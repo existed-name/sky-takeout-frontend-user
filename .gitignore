@@ -1,0 +1,84 @@
+# 个人文件
+draft/
+
+
+
+# Windows
+[Dd]esktop.ini
+Thumbs.db
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+out/
+.next/
+.nuxt/
+.output/
+.vite/
+
+# Cache
+.cache/
+.parcel-cache/
+.eslintcache/
+.stylelintcache/
+*.tsbuildinfo
+
+# Environment variables
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Test
+test-results/
+playwright-report/
+blob-report/
+
+# IDE / Editor
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
+# 微信开发者工具自动回写的个人私有配置，会覆盖 project.config.json 中的同名字段，各人机器不同，不应提交
+project.private.config.json
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Local configuration
+*.local
+
+# Package manager
+.pnpm-store/
+
+# Miscellaneous
+*.tgz

@@ -1,0 +1,30 @@
+@import './reset.css';
+@import './variables.css';
+
+html,
+body,
+#app {
+  height: 100%;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, 'PingFang SC',
+    'Hiragino Sans GB', 'Microsoft YaHei', Arial, sans-serif;
+  font-size: 14px;
+}
+
+/* 移动端优先：内容居中窄栏，桌面端两侧留白 */
+#app {
+  max-width: var(--app-max-width);
+  margin: 0 auto;
+  background-color: var(--color-bg);
+  min-height: 100%;
+}
+
+@media (min-width: 768px) {
+  body {
+    font-size: 15px;
+  }
+}

@@ -1,0 +1,21 @@
+/* 全局主题变量：主色沿用小程序（#E95F3C），页面背景 #F8F8F8 */
+:root {
+  --color-primary: #e95f3c;
+  --color-primary-light: #fdeee9;
+  --color-primary-dark: #cf4a29;
+
+  --color-text: #333333;
+  --color-text-secondary: #666666;
+  --color-text-placeholder: #999999;
+  --color-text-inverse: #ffffff;
+
+  --color-bg: #f8f8f8;
+  --color-bg-card: #ffffff;
+  --color-border: #eeeeee;
+  --color-danger: #ee0a24;
+
+  /* 移动端优先：桌面端居中窄栏，最大宽度约 480px */
+  --app-max-width: 480px;
+  --navbar-height: 44px;
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+}
