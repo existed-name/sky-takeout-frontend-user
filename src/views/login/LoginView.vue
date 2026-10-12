@@ -2,7 +2,7 @@
 /**
  * 体验登录页（替代微信授权登录）。
  *
- * 行为要点（方案 §5.1）：
+ * 行为要点：
  *   - 用户名 = 账号：后端按 openid = tourist_{name} 派生身份，同名即同账号；
  *     因此文案必须讲清「请使用自己的用户名」。
  *   - 必须预填上次用过的用户名（本地持久化）；从未登录过时随机生成一个「同学XXXX」开箱即用。
@@ -22,7 +22,7 @@ const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
 
-/** 用户名长度上限（后端文档未给上限，这里是宽松兜底） */
+/** 用户名长度上限（后端未给上限，这里是宽松兜底） */
 const MAX_NAME_LENGTH = 20
 
 const name = ref('')

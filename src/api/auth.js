@@ -10,8 +10,7 @@ import request from '@/utils/request'
 
 /**
  * Web 登录端点（唯一登录路径常量）。
- * 依据：用户提供的《Web 用户端登录端点》文档（最新、最权威）——
- *      POST /user/users/login/web，body 为 WebEndUserLoginDTO{name}。
+ * 端点：POST /user/users/login/web，body 为 WebEndUserLoginDTO{name}。
  * 注意：该路径已在后端 JWT 拦截器排除白名单内（免 token）。
  */
 export const WEB_LOGIN_ENDPOINT = '/user/users/login/web'
@@ -27,11 +26,11 @@ export const WEB_LOGIN_ENDPOINT = '/user/users/login/web'
  *   - openid: string，形如 tourist_{name}
  *   - token: string，JWT；由调用方（auth store）原样存下，请求层会自动放进 authentication 头
  * 是否需要 token：否（免鉴权）。
- * 字段来源依据：用户提供的登录端点文档；后端 WebEndUserLoginDTO.java 与 UserLoginVO.java。
+ * 字段以接口文档为准；对应后端 WebEndUserLoginDTO.java 与 UserLoginVO.java。
  *
  * 后端真实行为不在此处理：失败时 request 层会 reject 并弹一次提示，调用方只需 try/catch 复位 UI。
  *
- * @param {string} name 用户名（1–20 字符由登录页校验，后端文档未给出长度上限）
+ * @param {string} name 用户名（1–20 字符由登录页校验，后端未给出长度上限）
  * @returns {Promise<{id:number, openid:string, token:string}>}
  */
 export function loginWeb(name) {

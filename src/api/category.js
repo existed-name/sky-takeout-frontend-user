@@ -12,7 +12,7 @@ import request from '@/utils/request'
  * 出参字段（后端 Result<List<UserCategoryListItemVO>>）：
  *   - 数组，每项：{ id:number, type:number(1 菜品/2 套餐), name:string }
  * 是否需要 token：是。
- * 字段来源依据：调查报告 §2.2 与 §4（UserCategoryListItemVO）。
+ * 字段以接口文档为准（UserCategoryListItemVO）。
  * 实测：GET /user/categories → {"code":1,"msg":null,"data":[{"id":26,"type":1,"name":"超级答辩"}, ...]}
  *
  * @param {number} [type] 分类类型，1 菜品 / 2 套餐；不传表示全部

@@ -15,7 +15,7 @@ import request from '@/utils/request'
  *   - 注意：列表 VO 不含 provinceCode/cityCode/districtCode（需要用详情端点取回显码）。
  *   - sex / label 后端为字符串类型（DDL 是 varchar）。
  * 是否需要 token：是。
- * 字段来源依据：调查报告 §2.7 与 §4（AddressBookListItemVO）；后端 AddressBookDTO.java 字段类型复核。
+ * 字段以接口文档为准（AddressBookListItemVO）；字段类型与后端 AddressBookDTO 对齐。
  * 实测：GET /user/address-books → data:[{id:11,consignee:"TestUser",phone:"13800000000",sex:"1",
  *       provinceName:"Beijing",cityName:"Beijing",districtName:"Dongcheng",detail:"...",
  *       label:"1",isDefault:1}]（字段名一致）。
@@ -36,7 +36,7 @@ export function getAddressList() {
  * 出参字段（后端 Result<AddressBookDefaultVO>）：与列表项同构
  *   { id, consignee, phone, sex, provinceName, cityName, districtName, detail, label, isDefault }。
  * 是否需要 token：是。
- * 字段来源依据：调查报告 §2.7 与 §4（AddressBookDefaultVO）。
+ * 字段以接口文档为准（AddressBookDefaultVO）。
  * 特别注意（正常业务失败，不是异常）：
  *   - 用户「没有默认地址」时后端返回 HTTP 200 + code:0 + msg「您还没有设置默认地址~」，
  *     因此 request 层会 reject 而不是 resolve。
@@ -60,7 +60,7 @@ export function getDefaultAddress() {
  * 出参字段（后端 Result<AddressBookInfoVO>）：
  *   - 列表项字段 + 额外含 provinceCode / cityCode / districtCode（用于省市区三级联动回显）。
  * 是否需要 token：是。
- * 字段来源依据：调查报告 §2.7 与 §4（AddressBookInfoVO）。
+ * 字段以接口文档为准（AddressBookInfoVO）。
  * 实测：GET /user/address-books/11 → data 含 provinceCode:"11",cityCode:"1101",districtCode:"110101"（确认）。
  * 注意：访问不属于当前用户的 id 会返回 code:0（「该地址簿数据不属于当前用户」）。
  *
@@ -119,7 +119,7 @@ function buildAddressBody(form = {}) {
  *   - 禁止携带 id（后端 DTO 无该字段，路由参数里才有）。
  * 出参字段：无（Void）。
  * 是否需要 token：是。
- * 字段来源依据：调查报告 §2.7 与 §4；后端 AddressBookDTO.java 的校验注解复核。
+ * 字段以接口文档为准；校验规则与后端 AddressBookDTO 的校验注解一致。
  * 实测：完整字段 POST → {"code":1,"msg":null,"data":null}（成功）；缺字段/空 body → code:0。
  *
  * @param {object} form 地址表单（见上）
@@ -141,7 +141,7 @@ export function addAddress(form) {
  *   - form: 与「新增」相同的 AddressBookDTO 字段（Update 校验组）。
  * 出参字段：无（Void）。
  * 是否需要 token：是。
- * 字段来源依据：调查报告 §2.7 与 §4。
+ * 字段以接口文档为准（AddressBookDTO，Update 校验组）。
  * 备注：buildAddressBody 会剔除 form.id，避免把 id 混进请求体。
  *
  * @param {number} id 地址簿 id
@@ -163,7 +163,7 @@ export function updateAddress(id, form) {
  *   - id: number，必填。地址簿 id，拼进路径。
  * 出参字段：无（Void）。
  * 是否需要 token：是。
- * 字段来源依据：调查报告 §2.7 与 §4。
+ * 字段以接口文档为准。
  *
  * @param {number} id 地址簿 id
  * @returns {Promise<null>}
@@ -182,7 +182,7 @@ export function deleteAddress(id) {
  *   - id: number，必填。地址簿 id，拼进路径；不带请求体。
  * 出参字段：无（Void）。
  * 是否需要 token：是。
- * 字段来源依据：调查报告 §2.7 与 §4。
+ * 字段以接口文档为准。
  * 易错点：路径是 /{id}/default，方法 PUT。
  *
  * @param {number} id 地址簿 id

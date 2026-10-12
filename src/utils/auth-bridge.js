@@ -4,7 +4,7 @@
  * 为什么需要它：request.js 需要「跳转到登录页」，而 router 会 import 视图、视图会
  * import api、api 会 import request.js —— 直接 import router 会形成循环依赖。
  * 因此这里只暴露「注册 / 触发」两个动作：
- *   - 注册方：main.js（地基第三步接入 router 后注册真正的跳转实现）
+ *   - 注册方：main.js（接入 router 后注册真正的跳转实现）
  *   - 触发方：utils/request.js（401 闭环）
  */
 
@@ -27,6 +27,6 @@ export function triggerAuthRequired(payload = {}) {
     handler(payload)
     return
   }
-  // 尚未注册（例如地基第二步阶段）：不抛错，只给出可排查的提示。
+  // 尚未注册：不抛错，只给出可排查的提示。
   console.warn('[auth-bridge] 尚未注册登录跳转处理器，已忽略本次跳转请求', payload)
 }

@@ -12,7 +12,7 @@ export const DELIVERY_FEE_YUAN = 6
 /**
  * 打包费（单位：元 / 每份）。
  * 结算页打包费 = 商品总份数 × 该值；下单时 packAmount 传「总份数」、amount 里含这份费用。
- * 注意：该口径是小程序沿用值，后端对 packAmount/amount 只存不校验（见方案 §13.3 第 14 条）。
+ * 注意：该口径是小程序沿用值，后端对 packAmount/amount 只存不校验。
  */
 export const PACK_FEE_PER_ITEM_YUAN = 1
 

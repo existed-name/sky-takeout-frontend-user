@@ -24,7 +24,7 @@ import request from '@/utils/request'
  * 出参字段（后端 Result<OrderSubmitVO>）：
  *   - { id:number(订单 id), orderNumber:string, orderAmount:number, orderTime:string }
  * 是否需要 token：是。
- * 字段来源依据：调查报告 §2.8 与 §4（OrdersSubmitDTO、OrderSubmitVO）；后端源码字段复核。
+ * 字段以接口文档为准（OrdersSubmitDTO、OrderSubmitVO）。
  * 实测：因后端有「配送距离 5000 米」业务校验（测试地址太远被拒，返回
  *       {"code":0,"msg":"配送距离限制 5000.000000 米, 您的收货地址太远啦~~~"}），
  *       本端点「成功响应体」未能在本次实测中取得，字段名以源码 OrdersSubmitDTO/OrderSubmitVO 为准（待联调补测）。
@@ -49,7 +49,7 @@ export function submitOrder(payload) {
  *   - { nonceStr:string, paySign:string, timeStamp:string, signType:string, packageStr:string }
  *   - 后端实现直接 new OrderPaymentVO()（全字段 null），因此 Web 端不真正调起微信支付。
  * 是否需要 token：是。
- * 字段来源依据：调查报告 §2.8 与 §4（OrderPaymentVO）。
+ * 字段以接口文档为准（OrderPaymentVO）。
  * 备注：支付页应「先 payment 再 payment/success」两步走（照抄小程序已验证顺序）。
  *
  * @param {number} id 订单 id
@@ -69,7 +69,7 @@ export function createPayment(id) {
  *   - id: number，必填。订单 id，拼进路径。
  * 出参字段：无（Void）。
  * 是否需要 token：是。
- * 字段来源依据：调查报告 §2.8 与 §4。
+ * 字段以接口文档为准。
  * 备注：成功后后端会清空该用户购物车，调用方应同步清本地 cart 缓存。
  *
  * @param {number} id 订单 id
@@ -90,7 +90,7 @@ export function notifyPaymentSuccess(id) {
  *   - cancelReason: string，可选（@NotNull 未标，可传空串）。取消原因。
  * 出参字段：无（Void）。
  * 是否需要 token：是。
- * 字段来源依据：调查报告 §2.8 与 §4（OrderCancelDTO{cancelReason}）。
+ * 字段以接口文档为准（OrderCancelDTO{cancelReason}）。
  * 易错点：路径是 /user/orders/{id}/cancellation（orders 复数 + cancellation 双 l）；
  *         HTTP 方法 PUT；请求体必填（后端 @RequestBody），至少传 { cancelReason: '' }。
  *
@@ -113,7 +113,7 @@ export function cancelOrder(id, cancelReason = '') {
  *   - id: number，必填。源订单 id，拼进路径；不带请求体。
  * 出参字段：无（Void）。
  * 是否需要 token：是。
- * 字段来源依据：调查报告 §2.8 与 §4。
+ * 字段以接口文档为准。
  * 后端语义（务必知道）：只做「校验 + 插入」——把源订单明细复制进购物车，
  *   不清空原购物车、失败不回滚；失败原因含商品停售/下架、明细缺失、网络异常（code:0 + 文案）。
  *   因此三个页面的「再来一单」必须调用 api/reorder.js 的编排函数，本函数不得被页面直接使用。
@@ -135,7 +135,7 @@ export function reorderOrder(id) {
  *   - id: number，必填。订单 id，拼进路径；不带请求体。
  * 出参字段：无（Void）。
  * 是否需要 token：是。
- * 字段来源依据：调查报告 §2.8 与 §4。
+ * 字段以接口文档为准。
  *
  * @param {number} id 订单 id
  * @returns {Promise<null>}
@@ -161,7 +161,7 @@ export function urgeOrder(id) {
  *                                       orderDetailList:Array<OrderDetail> }> }
  *   - OrderDetail：{ id, name, orderId, dishId, setmealId, dishFlavor, number, amount(单价), image }
  * 是否需要 token：是。
- * 字段来源依据：调查报告 §2.8 与 §4（UserOrderPageQueryDTO、PageResult、UserOrderHistoryItemVO、OrderDetail）。
+ * 字段以接口文档为准（UserOrderPageQueryDTO、PageResult、UserOrderHistoryItemVO、OrderDetail）。
  * 实测：GET /user/orders/history?page=1&pageSize=10 → {"code":1,"msg":null,"data":{"total":0,"records":[]}}；
  *       带 status=1 同样 200（未含订单故 records 为空，明细字段名以源码为准）。
  *
@@ -194,7 +194,7 @@ export function getOrderHistory(query = {}) {
  *   - OrderDetail.amount 是「单价」（不是小计）。
  *   - 倒计时基准取 orderTime（15 分钟），不要用页面加载时间。
  * 是否需要 token：是。
- * 字段来源依据：调查报告 §2.8 与 §4（UserOrderInfoVO、OrderDetail）；后端源码字段复核。
+ * 字段以接口文档为准（UserOrderInfoVO、OrderDetail）。
  * 实测：GET /user/orders/1 → {"code":0,"msg":"订单不存在"}（测试用户无该订单，未能取得成功体，字段名以源码为准）。
  *
  * @param {number} id 订单 id

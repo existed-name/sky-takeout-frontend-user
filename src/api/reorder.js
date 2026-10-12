@@ -7,7 +7,7 @@
  *   若复制失败，用户原有购物车可能已被我们清掉。因此前端必须做「快照 → 清空 → 复制 →
  *   失败按快照尽力恢复」的保护。
  *
- * 语义（对齐小程序端的 reorderOrderWithCartProtection，写在方案 §4.11）：
+ * 语义（对齐小程序端的 reorderOrderWithCartProtection）：
  *   1. 重入锁：编排进行中再次触发，直接返回「正在处理上一次『再来一单』，请稍候」。
  *   2. 快照 → 清空 → 复制：先 GET 购物车取快照；
  *        · 快照非空 → DELETE 清空 → POST repetition；
