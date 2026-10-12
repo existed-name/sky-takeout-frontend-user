@@ -266,7 +266,7 @@ onBeforeUnmount(stopCountdown)
 .pay {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  min-height: 100%;
   background-color: var(--color-bg);
 }
 
@@ -274,9 +274,8 @@ onBeforeUnmount(stopCountdown)
   position: relative;
   flex: 1 1 auto;
   width: 100%;
-  max-width: var(--app-max-width);
   margin: 0 auto;
-  padding: 12px 12px 0;
+  padding: var(--gap-page) var(--gap-page) 0;
   box-sizing: border-box;
 }
 
@@ -296,14 +295,14 @@ onBeforeUnmount(stopCountdown)
 
 .pay__error-text {
   color: var(--color-text-secondary);
-  font-size: 14px;
+  font-size: var(--font-base);
 }
 
 .pay__card {
-  margin-bottom: 12px;
+  margin-bottom: var(--gap-block);
   padding: 20px 16px;
   background-color: var(--color-bg-card);
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
 }
 
 .pay__head {
@@ -318,29 +317,29 @@ onBeforeUnmount(stopCountdown)
   align-items: baseline;
   gap: 6px;
   color: var(--color-text-secondary);
-  font-size: 14px;
+  font-size: var(--font-base);
 }
 
 .pay__countdown-time {
-  color: var(--color-primary);
-  font-size: 18px;
+  color: var(--color-accent);
+  font-size: var(--font-heading);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
 
 .pay__timeout {
   color: var(--color-danger);
-  font-size: 15px;
+  font-size: var(--font-lg);
   font-weight: 600;
 }
 
 .pay__amount {
-  color: var(--color-text);
+  color: var(--color-price);
 }
 
 .pay__order-no {
   color: var(--color-text-placeholder);
-  font-size: 13px;
+  font-size: var(--font-md);
 }
 
 .pay__method-item {
@@ -351,24 +350,24 @@ onBeforeUnmount(stopCountdown)
 
 .pay__method-icon {
   font-size: 24px;
-  color: #09bb07;
+  color: var(--color-success);
 }
 
 .pay__method-name {
   flex: 1 1 auto;
   color: var(--color-text);
-  font-size: 15px;
+  font-size: var(--font-lg);
 }
 
 .pay__method-check {
-  color: var(--color-primary);
-  font-size: 18px;
+  color: var(--color-success);
+  font-size: var(--font-heading);
 }
 
 .pay__tip {
   margin: 4px 4px 0;
   color: var(--color-text-placeholder);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 
 .pay__footer {
@@ -376,16 +375,15 @@ onBeforeUnmount(stopCountdown)
   bottom: 0;
   z-index: 10;
   width: 100%;
-  max-width: var(--app-max-width);
   margin: 0 auto;
   padding: 12px 16px calc(12px + var(--safe-area-bottom));
   background-color: var(--color-bg-card);
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--shadow-bar);
   box-sizing: border-box;
 }
 
 .pay__pay-btn {
   height: 44px;
-  font-size: 16px;
+  font-size: var(--font-lg);
 }
 </style>

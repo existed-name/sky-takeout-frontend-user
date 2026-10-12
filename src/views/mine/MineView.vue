@@ -26,6 +26,7 @@ import { getOrderHistory } from '@/api/order'
 import { reorderWithCartProtection } from '@/api/reorder'
 import { useAuthStore } from '@/stores/auth'
 import { useCartStore } from '@/stores/cart'
+import { ORDER_STATUS } from '@/constants/orderStatus'
 import { formatDateTime, toTimestamp } from '@/utils/format'
 
 const router = useRouter()
@@ -66,6 +67,23 @@ function remainMsOf(orderTime) {
 /** 待付款且未超时：显示「去支付」 */
 function canPay(order) {
   return Number(order.status) === 1 && remainMsOf(order.orderTime) > 0
+}
+
+/**
+ * 状态文案颜色（文案由 OrderStatusText 渲染，颜色由本页按状态显式传入）：
+ *   - 待付款 / 待接单 → 琥珀橙（主色黄在白底不可读，不能用）；
+ *   - 待付款已超时（文案显示为「已取消」）→ 占位灰；
+ *   - 其余进行态 / 已完成 → 次级灰。
+ */
+function statusColor(order) {
+  const s = Number(order.status)
+  if (s === ORDER_STATUS.UNPAID) {
+    const ms = remainMsOf(order.orderTime)
+    // 与 OrderStatusText 口径一致：时间非法（null）按「未超时」处理
+    return ms === null || ms > 0 ? 'var(--color-accent)' : 'var(--color-text-placeholder)'
+  }
+  if (s === ORDER_STATUS.PENDING_ACCEPT) return 'var(--color-accent)'
+  return 'var(--color-text-secondary)'
 }
 
 /** 总份数（明细可能为 null，需守卫） */
@@ -243,6 +261,7 @@ onBeforeUnmount(() => {
                 class="order-card__status"
                 :status="order.status"
                 :remain-ms="remainMsOf(order.orderTime)"
+                :color="statusColor(order)"
               />
             </div>
 
@@ -302,7 +321,7 @@ onBeforeUnmount(() => {
 <style scoped>
 .mine {
   position: relative;
-  min-height: 100vh;
+  min-height: 100%;
   background-color: var(--color-bg);
 }
 
@@ -322,21 +341,22 @@ onBeforeUnmount(() => {
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background-color: var(--color-primary-light);
-  color: var(--color-primary);
+  /* 黄底深字：主色底配 --color-primary-text，禁止白字压黄 */
+  background-color: var(--color-primary);
+  color: var(--color-primary-text);
   font-size: 30px;
 }
 
 .profile__name {
   color: var(--color-text);
-  font-size: 18px;
+  font-size: var(--font-heading);
   font-weight: 600;
 }
 
 .profile__hint {
   margin-top: 4px;
   color: var(--color-text-placeholder);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 
 /* 入口 */
@@ -359,14 +379,14 @@ onBeforeUnmount(() => {
 }
 
 .entry__icon {
-  color: var(--color-primary);
+  color: var(--color-primary-border);
   font-size: 20px;
 }
 
 .entry__text {
   flex: 1 1 auto;
   color: var(--color-text);
-  font-size: 15px;
+  font-size: var(--font-lg);
 }
 
 .entry__arrow {
@@ -377,13 +397,13 @@ onBeforeUnmount(() => {
 /* 最近订单 */
 .recent {
   margin-top: 12px;
-  padding: 0 12px 24px;
+  padding: 0 var(--gap-page) 24px;
 }
 
 .recent__title {
   padding: 4px 4px 10px;
   color: var(--color-text);
-  font-size: 15px;
+  font-size: var(--font-title);
   font-weight: 600;
 }
 
@@ -394,10 +414,10 @@ onBeforeUnmount(() => {
 
 /* 订单卡片 */
 .order-card {
-  margin-bottom: 12px;
+  margin-bottom: var(--gap-block);
   padding: 12px 14px;
   background-color: var(--color-bg-card);
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
 }
 
 .order-card__head {
@@ -409,12 +429,11 @@ onBeforeUnmount(() => {
 
 .order-card__time {
   color: var(--color-text-secondary);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 
 .order-card__status {
-  color: var(--color-primary);
-  font-size: 13px;
+  font-size: var(--font-md);
 }
 
 .order-card__main {
@@ -442,7 +461,7 @@ onBeforeUnmount(() => {
 .thumb__img {
   width: 56px;
   height: 56px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   object-fit: cover;
   background-color: var(--color-bg);
 }
@@ -464,14 +483,14 @@ onBeforeUnmount(() => {
 
 .order-card__amount {
   display: block;
-  color: var(--color-text);
+  color: var(--color-price);
 }
 
 .order-card__count {
   display: block;
   margin-top: 4px;
   color: var(--color-text-placeholder);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 
 .order-card__actions {

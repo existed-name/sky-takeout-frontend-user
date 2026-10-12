@@ -2,6 +2,10 @@
 /**
  * 金额显示：统一「￥ + 两位小数」。
  *
+ * 颜色口径：金额一律用 var(--color-price)（橙红 #E94E3C），**不得用主色黄**
+ *   （黄在浅色底上不可读，且「价格色」与「品牌主色」是两套语义）。
+ *   调用方需显式指定颜色时传 color="var(--color-price)"；不传则继承父级。
+ *
  * 内部一律走 src/utils/money.js（分为单位的整数运算），禁止浮点运算。
  * 两种入参方式，二选一：
  *   - fen：直接给「分」（整数），最精确，推荐用于渲染后端返回的金额字段；
@@ -20,7 +24,7 @@ const props = defineProps({
   showSymbol: { type: Boolean, default: true },
   /** 字号，如 '12px' / '16px'；不传则继承父级 */
   size: { type: String, default: '' },
-  /** 颜色，任意合法 CSS 颜色；不传则继承父级 */
+  /** 颜色，任意合法 CSS 颜色；不传则继承父级。金额应传 var(--color-price) */
   color: { type: String, default: '' },
   /** 是否加粗 */
   bold: { type: Boolean, default: false },

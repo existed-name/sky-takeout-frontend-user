@@ -48,7 +48,7 @@ onBeforeUnmount(() => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
+  min-height: 100%;
   padding: 24px 20px;
   box-sizing: border-box;
   text-align: center;
@@ -62,14 +62,14 @@ onBeforeUnmount(() => {
 .offline__title {
   margin-top: 20px;
   color: var(--color-text);
-  font-size: 18px;
+  font-size: var(--font-heading);
   font-weight: 600;
 }
 
 .offline__desc {
   margin-top: 8px;
   color: var(--color-text-secondary);
-  font-size: 14px;
+  font-size: var(--font-base);
 }
 
 .offline__button {
@@ -80,6 +80,6 @@ onBeforeUnmount(() => {
 .offline__hint {
   margin-top: 16px;
   color: var(--color-text-placeholder);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 </style>

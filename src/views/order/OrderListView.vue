@@ -27,7 +27,7 @@ import OrderStatusText from '@/components/OrderStatusText.vue'
 import { getOrderHistory, urgeOrder } from '@/api/order'
 import { reorderWithCartProtection } from '@/api/reorder'
 import { useCartStore } from '@/stores/cart'
-import { ORDER_LIST_TABS } from '@/constants/orderStatus'
+import { ORDER_LIST_TABS, ORDER_STATUS } from '@/constants/orderStatus'
 import { formatDateTime, toTimestamp } from '@/utils/format'
 import { notifyToast } from '@/utils/notify'
 
@@ -85,6 +85,23 @@ function canPay(order) {
 /** 待接单：显示「催单」 */
 function canUrge(order) {
   return Number(order.status) === 2
+}
+
+/**
+ * 状态文案颜色（文案由 OrderStatusText 渲染，颜色由本页按状态显式传入）：
+ *   - 待付款 / 待接单 → 琥珀橙（主色黄在白底不可读，不能用）；
+ *   - 待付款已超时（文案显示为「已取消」）→ 占位灰；
+ *   - 其余进行态 / 已完成 → 次级灰。
+ */
+function statusColor(order) {
+  const s = Number(order.status)
+  if (s === ORDER_STATUS.UNPAID) {
+    const ms = remainMsOf(order.orderTime)
+    // 与 OrderStatusText 口径一致：时间非法（null）按「未超时」处理
+    return ms === null || ms > 0 ? 'var(--color-accent)' : 'var(--color-text-placeholder)'
+  }
+  if (s === ORDER_STATUS.PENDING_ACCEPT) return 'var(--color-accent)'
+  return 'var(--color-text-secondary)'
 }
 
 /** 总份数（明细可能为 null，需守卫） */
@@ -266,6 +283,7 @@ onBeforeUnmount(() => {
                 class="order-card__status"
                 :status="order.status"
                 :remain-ms="remainMsOf(order.orderTime)"
+                :color="statusColor(order)"
               />
             </div>
 
@@ -344,7 +362,7 @@ onBeforeUnmount(() => {
 <style scoped>
 .order-list {
   position: relative;
-  min-height: 100vh;
+  min-height: 100%;
   background-color: var(--color-bg);
 }
 
@@ -365,12 +383,12 @@ onBeforeUnmount(() => {
   border: none;
   background: none;
   color: var(--color-text-secondary);
-  font-size: 14px;
+  font-size: var(--font-base);
   cursor: pointer;
 }
 
 .tabs__item--active {
-  color: var(--color-primary);
+  color: var(--color-accent);
   font-weight: 600;
 }
 
@@ -380,14 +398,15 @@ onBeforeUnmount(() => {
   left: 50%;
   width: 28px;
   height: 2px;
-  border-radius: 2px;
+  border-radius: var(--radius-xs);
   background-color: var(--color-primary);
+  /* 下划线居中：这是合法的居中写法，不属于「相对视口居中」的 hack，勿删 */
   transform: translateX(-50%);
   content: '';
 }
 
 .order-list__body {
-  padding: 12px;
+  padding: var(--gap-page);
 }
 
 .order-list__retry {
@@ -397,10 +416,10 @@ onBeforeUnmount(() => {
 
 /* 订单卡片 */
 .order-card {
-  margin-bottom: 12px;
+  margin-bottom: var(--gap-block);
   padding: 12px 14px;
   background-color: var(--color-bg-card);
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
 }
 
 .order-card__head {
@@ -412,12 +431,11 @@ onBeforeUnmount(() => {
 
 .order-card__time {
   color: var(--color-text-secondary);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 
 .order-card__status {
-  color: var(--color-primary);
-  font-size: 13px;
+  font-size: var(--font-md);
 }
 
 .order-card__main {
@@ -445,7 +463,7 @@ onBeforeUnmount(() => {
 .thumb__img {
   width: 56px;
   height: 56px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   object-fit: cover;
   background-color: var(--color-bg);
 }
@@ -467,14 +485,14 @@ onBeforeUnmount(() => {
 
 .order-card__amount {
   display: block;
-  color: var(--color-text);
+  color: var(--color-price);
 }
 
 .order-card__count {
   display: block;
   margin-top: 4px;
   color: var(--color-text-placeholder);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 
 .order-card__actions {

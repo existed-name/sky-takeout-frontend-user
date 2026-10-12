@@ -177,7 +177,9 @@ async function addItem(item, dishFlavor = null) {
       await cart.add({ dishId: item.id, dishFlavor })
     }
   } catch (e) {
-    // 请求层已弹提示
+    // 加购请求本身失败（非静默端点）由请求层弹提示；
+    // 仅当加购成功、回灌失败（静默的 GET）时，才在这里补一次轻提示
+    if (e && e.stage === 'refresh') notifyToast('购物车刷新失败，请稍后重试')
   }
 }
 
@@ -187,7 +189,9 @@ async function decrementItem(item) {
   try {
     await cart.decrement(row.id)
   } catch (e) {
-    // 请求层已提示
+    // 减购请求本身失败（非静默端点）由请求层弹提示；
+    // 仅当减购成功、回灌失败（静默的 GET）时，才在这里补一次轻提示
+    if (e && e.stage === 'refresh') notifyToast('购物车刷新失败，请稍后重试')
   }
 }
 
@@ -199,7 +203,9 @@ async function addRow(row) {
       await cart.add({ dishId: row.dishId, dishFlavor: row.dishFlavor || null })
     }
   } catch (e) {
-    // 请求层已提示
+    // 加购请求本身失败（非静默端点）由请求层弹提示；
+    // 仅当加购成功、回灌失败（静默的 GET）时，才在这里补一次轻提示
+    if (e && e.stage === 'refresh') notifyToast('购物车刷新失败，请稍后重试')
   }
 }
 
@@ -207,7 +213,9 @@ async function decrementRow(row) {
   try {
     await cart.decrement(row.id)
   } catch (e) {
-    // 请求层已提示
+    // 减购请求本身失败（非静默端点）由请求层弹提示；
+    // 仅当减购成功、回灌失败（静默的 GET）时，才在这里补一次轻提示
+    if (e && e.stage === 'refresh') notifyToast('购物车刷新失败，请稍后重试')
   }
 }
 
@@ -335,6 +343,18 @@ function openSpecFromDetail() {
 
 const reloading = ref(false)
 
+/** 营业状态徽标文案：status 为 null（尚未查询/查询失败）时不能误报「休息中」 */
+const shopStatusText = computed(() => {
+  if (shop.status === null) return '状态未知'
+  return shop.isOpen ? '营业中' : '休息中'
+})
+
+/** 营业状态徽标样式类：null 走第三态（灰底），避免与「休息中」混同 */
+const shopStatusClass = computed(() => {
+  if (shop.status === null) return 'shop__status--unknown'
+  return shop.isOpen ? 'shop__status--open' : 'shop__status--closed'
+})
+
 /** 「重新加载」：只重查营业状态；不放宽遮罩对其它区域的拦截 */
 async function reloadShopStatus() {
   if (reloading.value) return
@@ -418,7 +438,10 @@ function goMine() {
 /* ------------------------------ 生命周期 ------------------------------ */
 
 onMounted(() => {
-  shop.refresh()
+  shop.refresh().then((ok) => {
+    // 首屏首次查营业状态失败：端点是静默的，不会自动弹，这里补一次可见反馈
+    if (!ok) notifyToast(shop.error || '暂时无法获取店铺状态，请检查网络后重试')
+  })
   cart.refresh().catch(() => {
     // 静默端点，失败由空态体现
   })
@@ -448,11 +471,8 @@ onBeforeUnmount(() => {
       <div class="shop__top">
         <div class="shop__name-row">
           <span class="shop__name">{{ SHOP_INFO.name }}</span>
-          <span
-            class="shop__status"
-            :class="shop.isOpen ? 'shop__status--open' : 'shop__status--closed'"
-          >
-            {{ shop.isOpen ? '营业中' : '休息中' }}
+          <span class="shop__status" :class="shopStatusClass">
+            {{ shopStatusText }}
           </span>
         </div>
         <div class="shop__meta">
@@ -503,7 +523,7 @@ onBeforeUnmount(() => {
             <div class="dish__sales">月销量0</div>
 
             <div class="dish__bottom">
-              <MoneyText :value="item.price" size="16px" color="var(--color-primary)" bold />
+              <MoneyText :value="item.price" size="var(--font-heading)" color="var(--color-price)" bold />
 
               <div class="dish__actions">
                 <template v-if="hasFlavors(item)">
@@ -575,7 +595,7 @@ onBeforeUnmount(() => {
       </div>
       <template #footer>
         <div v-if="specDish" class="spec__footer">
-          <MoneyText :value="specDish.price" size="18px" color="var(--color-primary)" bold />
+          <MoneyText :value="specDish.price" size="var(--font-heading)" color="var(--color-price)" bold />
           <van-button type="primary" round size="small" @click="confirmSpec">
             加入购物车
           </van-button>
@@ -584,7 +604,7 @@ onBeforeUnmount(() => {
     </PopupSheet>
 
     <!-- 菜品 / 套餐详情弹层 -->
-    <PopupSheet v-model:show="detailVisible" title="商品详情" max-height="80vh">
+    <PopupSheet v-model:show="detailVisible" title="商品详情" max-height="80%">
       <div v-if="detailItem" class="detail">
         <template v-if="detailItem.__type === 1">
           <img class="detail__image" :src="detailItem.image" :alt="detailItem.name" />
@@ -607,7 +627,7 @@ onBeforeUnmount(() => {
 
       <template #footer>
         <div v-if="detailItem" class="detail__footer">
-          <MoneyText :value="detailItem.price" size="18px" color="var(--color-primary)" bold />
+          <MoneyText :value="detailItem.price" size="var(--font-heading)" color="var(--color-price)" bold />
           <button
             v-if="hasFlavors(detailItem)"
             class="spec-btn"
@@ -635,7 +655,7 @@ onBeforeUnmount(() => {
     </PopupSheet>
 
     <!-- 购物车弹层（按商品分组） -->
-    <PopupSheet v-model:show="cartVisible" title="购物车" max-height="60vh">
+    <PopupSheet v-model:show="cartVisible" title="购物车" max-height="60%">
       <div class="cart-pop">
         <div class="cart-pop__toolbar">
           <button class="cart-pop__clear" type="button" @click="onClearCart">
@@ -654,7 +674,7 @@ onBeforeUnmount(() => {
               <div class="cart-row__name">{{ row.name }}</div>
               <div v-if="row.dishFlavor" class="cart-row__flavor">{{ row.dishFlavor }}</div>
               <div class="cart-row__bottom">
-                <MoneyText :value="row.amount" size="14px" color="var(--color-primary)" />
+                <MoneyText :value="row.amount" size="var(--font-base)" color="var(--color-price)" />
                 <div class="cart-row__actions">
                   <button
                     class="round-btn round-btn--minus"
@@ -712,18 +732,20 @@ onBeforeUnmount(() => {
   position: relative;
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100%;
   overflow: hidden;
   background-color: var(--color-bg);
 }
 
 /* ---------- 店铺信息区 ---------- */
+/* 悬浮信息卡：全站唯一允许带阴影的卡（圆角 8px + --shadow-card） */
 .shop {
   flex: none;
   margin: 8px 10px 0;
   padding: 12px;
   background-color: var(--color-bg-card);
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
 }
 
 .shop__name-row {
@@ -734,24 +756,31 @@ onBeforeUnmount(() => {
 
 .shop__name {
   color: var(--color-text);
-  font-size: 17px;
+  font-size: var(--font-heading);
   font-weight: 700;
 }
 
 .shop__status {
   padding: 1px 6px;
-  border-radius: 4px;
-  font-size: 11px;
+  border-radius: var(--radius-xs);
+  font-size: var(--font-sm);
 }
 
+/* 营业中：绿底白字（绿底对比度足够，白字可读；黄底才必须配深字） */
 .shop__status--open {
-  background-color: var(--color-primary-light);
-  color: var(--color-primary);
+  background-color: var(--color-success);
+  color: var(--color-text-inverse);
 }
 
 .shop__status--closed {
-  background-color: #f0f0f0;
+  background-color: var(--color-bg-muted);
   color: var(--color-text-secondary);
+}
+
+/* 第三态：尚未查到 / 查询失败，灰底灰字，避免误显示成「休息中」 */
+.shop__status--unknown {
+  background-color: var(--color-bg-muted);
+  color: var(--color-text-placeholder);
 }
 
 .shop__meta {
@@ -760,7 +789,7 @@ onBeforeUnmount(() => {
   gap: 12px;
   margin-top: 8px;
   color: var(--color-text-placeholder);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 
 .shop__bottom {
@@ -779,14 +808,14 @@ onBeforeUnmount(() => {
 
 .shop__desc {
   color: var(--color-text-secondary);
-  font-size: 12px;
+  font-size: var(--font-sm);
   line-height: 1.5;
 }
 
 .shop__address {
   margin-top: 4px;
   color: var(--color-text-placeholder);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 
 .shop__phone {
@@ -797,7 +826,7 @@ onBeforeUnmount(() => {
   border-radius: 50%;
   background-color: var(--color-primary-light);
   color: var(--color-primary);
-  font-size: 20px;
+  font-size: var(--font-sheet);
   cursor: pointer;
 }
 
@@ -807,7 +836,8 @@ onBeforeUnmount(() => {
   display: flex;
   min-height: 0;
   margin-top: 8px;
-  padding-bottom: 88px;
+  /* 为底部 CartBar 预留：52(视觉高) + 12(悬浮偏移) + 12(间距) + 安全区 */
+  padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px));
   box-sizing: border-box;
 }
 
@@ -815,15 +845,18 @@ onBeforeUnmount(() => {
   flex: none;
   width: 88px;
   overflow-y: auto;
-  background-color: #f5f5f5;
+  background-color: var(--color-bg-side);
 }
 
 .menu-types__item {
   padding: 14px 6px;
   color: var(--color-text-secondary);
-  font-size: 13px;
+  font-size: var(--font-md);
   text-align: center;
   cursor: pointer;
+  /* 分类选中：底色与字色 0.2s 过渡 */
+  transition: background-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
 }
 
 .menu-types__item--active {
@@ -858,7 +891,7 @@ onBeforeUnmount(() => {
   width: 84px;
   height: 84px;
   overflow: hidden;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   background-color: var(--color-bg);
   cursor: pointer;
 }
@@ -879,7 +912,7 @@ onBeforeUnmount(() => {
 
 .dish__name {
   color: var(--color-text);
-  font-size: 15px;
+  font-size: var(--font-lg);
   font-weight: 600;
   cursor: pointer;
 }
@@ -887,7 +920,7 @@ onBeforeUnmount(() => {
 .dish__desc {
   margin-top: 3px;
   color: var(--color-text-placeholder);
-  font-size: 12px;
+  font-size: var(--font-sm);
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 1;
@@ -898,7 +931,7 @@ onBeforeUnmount(() => {
 .dish__sales {
   margin-top: 3px;
   color: var(--color-text-placeholder);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 
 .dish__bottom {
@@ -919,8 +952,10 @@ onBeforeUnmount(() => {
 .dish__count {
   min-width: 16px;
   color: var(--color-text);
-  font-size: 14px;
+  font-size: var(--font-base);
   text-align: center;
+  /* 份数变化：0.2s 颜色过渡（数量反馈保持克制，不做位移动画） */
+  transition: color var(--duration-fast) var(--ease-out);
 }
 
 /* ---------- 按钮 ---------- */
@@ -933,35 +968,51 @@ onBeforeUnmount(() => {
   padding: 0;
   border: none;
   border-radius: 50%;
-  font-size: 14px;
+  font-size: var(--font-base);
   cursor: pointer;
+  /* 按压/选中态只改底色与描边色，不做位移或缩放（与小程序一致） */
+  transition: background-color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
 }
 
+/* 加购圆钮：黄底必须配深字 */
 .round-btn--plus {
   background-color: var(--color-primary);
-  color: #fff;
+  color: var(--color-primary-text);
 }
 
+/* 减号圆钮：透明底 + 琥珀描边 + 主色图标 */
 .round-btn--minus {
   background-color: transparent;
-  border: 1px solid var(--color-primary);
+  border: 1px solid var(--color-primary-border);
   color: var(--color-primary);
 }
 
+/* 选择规格：小胶囊按钮，黄底深字 */
 .spec-btn {
   padding: 4px 12px;
   border: none;
-  border-radius: 14px;
+  border-radius: var(--radius-pill);
   background-color: var(--color-primary);
-  color: #fff;
-  font-size: 12px;
+  color: var(--color-primary-text);
+  font-size: var(--font-sm);
   cursor: pointer;
+}
+
+/* 弹层内容左右留白：PopupSheet 的 __body 自身不带内边距，页面需自行补，
+   否则弹层内容会贴着手机屏幕左右边缘（详见报告「偏离项」） */
+.spec,
+.detail,
+.cart-pop {
+  padding-right: var(--gap-page);
+  padding-left: var(--gap-page);
 }
 
 /* ---------- 规格弹层 ---------- */
 .spec__dish {
   color: var(--color-text);
-  font-size: 15px;
+  font-size: var(--font-lg);
   font-weight: 600;
 }
 
@@ -971,7 +1022,7 @@ onBeforeUnmount(() => {
 
 .spec__label {
   color: var(--color-text-secondary);
-  font-size: 13px;
+  font-size: var(--font-md);
 }
 
 .spec__options {
@@ -984,17 +1035,22 @@ onBeforeUnmount(() => {
 .spec__option {
   padding: 5px 12px;
   border: 1px solid var(--color-border);
-  border-radius: 14px;
-  background-color: #fafafa;
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-muted);
   color: var(--color-text-secondary);
-  font-size: 13px;
+  font-size: var(--font-md);
   cursor: pointer;
+  /* 选中态：底色/描边/字色 0.2s 过渡 */
+  transition: background-color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
 }
 
+/* 选中态：浅黄底 + 琥珀描边 + 橙字（黄底不可配白字，这里也不用纯黄字） */
 .spec__option--active {
-  border-color: var(--color-primary);
+  border-color: var(--color-primary-border);
   background-color: var(--color-primary-light);
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 .spec__footer,
@@ -1010,14 +1066,14 @@ onBeforeUnmount(() => {
   width: 100%;
   max-height: 200px;
   object-fit: cover;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   display: block;
 }
 
 .detail__name {
   margin-top: 10px;
   color: var(--color-text);
-  font-size: 16px;
+  font-size: var(--font-title);
   font-weight: 600;
 }
 
@@ -1028,7 +1084,7 @@ onBeforeUnmount(() => {
 .detail__desc {
   margin-top: 6px;
   color: var(--color-text-secondary);
-  font-size: 13px;
+  font-size: var(--font-md);
   line-height: 1.6;
 }
 
@@ -1044,7 +1100,7 @@ onBeforeUnmount(() => {
   width: 56px;
   height: 56px;
   object-fit: cover;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   background-color: var(--color-bg);
 }
 
@@ -1055,7 +1111,7 @@ onBeforeUnmount(() => {
 
 .detail__setmeal-name {
   color: var(--color-text);
-  font-size: 14px;
+  font-size: var(--font-base);
 }
 
 .detail__setmeal-name span {
@@ -1065,7 +1121,7 @@ onBeforeUnmount(() => {
 .detail__setmeal-desc {
   margin-top: 4px;
   color: var(--color-text-placeholder);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 
 /* ---------- 购物车弹层 ---------- */
@@ -1082,7 +1138,7 @@ onBeforeUnmount(() => {
   border: none;
   background: transparent;
   color: var(--color-text-placeholder);
-  font-size: 13px;
+  font-size: var(--font-md);
   cursor: pointer;
 }
 
@@ -1092,7 +1148,7 @@ onBeforeUnmount(() => {
 
 .cart-pop__group-name {
   color: var(--color-text-secondary);
-  font-size: 13px;
+  font-size: var(--font-md);
   font-weight: 600;
 }
 
@@ -1108,7 +1164,7 @@ onBeforeUnmount(() => {
   width: 56px;
   height: 56px;
   object-fit: cover;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   background-color: var(--color-bg);
 }
 
@@ -1121,13 +1177,13 @@ onBeforeUnmount(() => {
 
 .cart-row__name {
   color: var(--color-text);
-  font-size: 14px;
+  font-size: var(--font-base);
 }
 
 .cart-row__flavor {
   margin-top: 3px;
   color: var(--color-text-placeholder);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 
 .cart-row__bottom {
@@ -1140,18 +1196,18 @@ onBeforeUnmount(() => {
 /* ---------- 电话弹层 ---------- */
 .phone {
   text-align: center;
-  padding: 8px 0;
+  padding: 8px var(--gap-page);
 }
 
 .phone__label {
   color: var(--color-text-secondary);
-  font-size: 13px;
+  font-size: var(--font-md);
 }
 
 .phone__number {
   margin-top: 6px;
   color: var(--color-text);
-  font-size: 20px;
+  font-size: var(--font-sheet);
   font-weight: 700;
   letter-spacing: 1px;
 }
@@ -1159,31 +1215,27 @@ onBeforeUnmount(() => {
 .phone__hint {
   margin-top: 10px;
   color: var(--color-text-placeholder);
-  font-size: 12px;
+  font-size: var(--font-sm);
   line-height: 1.5;
 }
 
 /* ---------- 打烊遮罩 ---------- */
+/* inset: 0 会随包含块（手机屏容器）自动铺满，无需相对视口居中的 hack */
 .closed {
   position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 50%;
+  inset: 0;
   z-index: 900;
-  width: 100%;
-  max-width: var(--app-max-width, 480px);
-  transform: translateX(-50%);
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: var(--color-mask);
 }
 
 .closed__card {
   width: 240px;
   padding: 24px 20px;
-  background-color: #fff;
-  border-radius: 12px;
+  background-color: var(--color-bg-card);
+  border-radius: var(--radius-sheet);
   text-align: center;
 }
 
@@ -1195,7 +1247,7 @@ onBeforeUnmount(() => {
 .closed__title {
   margin-top: 10px;
   color: var(--color-text);
-  font-size: 16px;
+  font-size: var(--font-title);
   font-weight: 600;
 }
 

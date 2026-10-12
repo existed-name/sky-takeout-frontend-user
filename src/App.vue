@@ -1,8 +1,13 @@
 <script setup>
-// 应用根组件：仅承载路由出口。
-// 全局弹层（Vant Dialog/Toast 等）由各自触发点通过 Teleport 挂到 body，无需在此宿主。
+/**
+ * 应用根组件：路由出口整体放进「手机屏容器」（AppShell）。
+ * 弹层统一挂到容器内的覆盖层（#app-overlay-layer），不再挂到 document.body。
+ */
+import AppShell from '@/components/AppShell.vue'
 </script>
 
 <template>
-  <RouterView />
+  <AppShell>
+    <RouterView />
+  </AppShell>
 </template>

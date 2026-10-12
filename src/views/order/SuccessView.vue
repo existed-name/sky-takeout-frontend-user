@@ -125,7 +125,7 @@ resolveArrival()
 .success {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  min-height: 100%;
   background-color: var(--color-bg);
 }
 
@@ -136,7 +136,6 @@ resolveArrival()
   flex-direction: column;
   align-items: center;
   width: 100%;
-  max-width: var(--app-max-width);
   margin: 0 auto;
   padding: 48px 24px;
   box-sizing: border-box;
@@ -148,7 +147,7 @@ resolveArrival()
   justify-content: center;
   width: 72px;
   height: 72px;
-  color: #fff;
+  color: var(--color-primary-text);
   font-size: 44px;
   background-color: var(--color-primary);
   border-radius: 50%;
@@ -164,18 +163,18 @@ resolveArrival()
 .success__arrival {
   margin-top: 16px;
   color: var(--color-text-secondary);
-  font-size: 15px;
+  font-size: var(--font-lg);
 }
 
 .success__arrival-time {
-  color: var(--color-primary);
+  color: var(--color-accent);
   font-weight: 600;
 }
 
 .success__desc {
   margin-top: 10px;
   color: var(--color-text-placeholder);
-  font-size: 13px;
+  font-size: var(--font-md);
   text-align: center;
 }
 

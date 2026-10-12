@@ -174,22 +174,22 @@ onMounted(loadList)
 <style scoped>
 .addr-list {
   position: relative;
-  min-height: 100vh;
+  min-height: 100%;
   box-sizing: border-box;
   padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
 }
 
 .addr-list__body {
   position: relative;
-  padding: 12px 12px 0;
+  padding: var(--gap-block) var(--gap-page) 0;
 }
 
 .addr-card {
   position: relative;
-  margin-bottom: 12px;
-  padding: 14px 12px 0;
-  background-color: var(--color-bg-card, #ffffff);
-  border-radius: 10px;
+  margin-bottom: var(--gap-block);
+  padding: 14px var(--gap-page) 0;
+  background-color: var(--color-bg-card);
+  border-radius: var(--radius-md);
 }
 
 .addr-card__main {
@@ -209,16 +209,16 @@ onMounted(loadList)
   flex: none;
   margin-right: 8px;
   padding: 1px 6px;
-  color: var(--color-primary, #e95f3c);
-  font-size: 12px;
+  color: var(--color-accent);
+  font-size: var(--font-sm);
   line-height: 18px;
-  background-color: var(--color-primary-light, #fdeee9);
-  border-radius: 4px;
+  background-color: var(--color-primary-light);
+  border-radius: var(--radius-xs);
 }
 
 .addr-card__addr {
-  color: var(--color-text, #333333);
-  font-size: 15px;
+  color: var(--color-text);
+  font-size: var(--font-lg);
   line-height: 22px;
   word-break: break-all;
 }
@@ -226,8 +226,8 @@ onMounted(loadList)
 .addr-card__line--who {
   justify-content: space-between;
   margin-top: 8px;
-  color: var(--color-text-secondary, #666666);
-  font-size: 13px;
+  color: var(--color-text-secondary);
+  font-size: var(--font-md);
 }
 
 .addr-card__edit {
@@ -235,8 +235,8 @@ onMounted(loadList)
   top: 14px;
   right: 10px;
   padding: 4px;
-  color: var(--color-text-placeholder, #999999);
-  font-size: 18px;
+  color: var(--color-text-placeholder);
+  font-size: var(--font-heading);
 }
 
 .addr-card__footer {
@@ -244,7 +244,7 @@ onMounted(loadList)
   align-items: center;
   margin-top: 12px;
   padding: 10px 0;
-  border-top: 1px solid var(--color-border, #eeeeee);
+  border-top: 1px solid var(--color-border);
 }
 
 .addr-card__footer.is-pending {
@@ -254,36 +254,34 @@ onMounted(loadList)
 .addr-card__radio {
   display: inline-flex;
   margin-right: 6px;
-  color: var(--color-text-placeholder, #999999);
-  font-size: 18px;
+  color: var(--color-text-placeholder);
+  font-size: var(--font-heading);
 }
 
 .addr-card__radio.is-on {
-  color: var(--color-primary, #e95f3c);
+  color: var(--color-primary);
 }
 
 .addr-card__default-text {
-  color: var(--color-text-secondary, #666666);
-  font-size: 13px;
+  color: var(--color-text-secondary);
+  font-size: var(--font-md);
 }
 
 .addr-list__bar {
   position: fixed;
-  left: 50%;
+  left: 0;
   bottom: 0;
   z-index: 50;
   width: 100%;
-  max-width: var(--app-max-width, 480px);
-  transform: translateX(-50%);
   box-sizing: border-box;
-  padding: 10px 12px;
-  padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
-  background-color: var(--color-bg, #f8f8f8);
+  padding: 14px var(--gap-page);
+  padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  background-color: var(--color-bg);
 }
 
 .addr-list__add-icon {
   margin-right: 2px;
-  font-size: 16px;
+  font-size: var(--font-title);
   font-weight: 700;
 }
 </style>

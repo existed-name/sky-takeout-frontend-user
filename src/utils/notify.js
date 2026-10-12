@@ -1,13 +1,13 @@
 /**
  * 全局失败提示（等价于小程序的 uni.showModal）。
- * 职责：归一空白 → 截断 40 字 → 兜底文案 → 去重 → 弹出。
+ * 职责：归一空白 → 兜底文案 → 去重 → 弹出。
+ * 长文案不截断：Vant 弹窗的 message 会自动换行并限制最大高（超出时容器内滚动）。
  * 只有请求层（utils/request.js）应调用本模块；页面不再各自弹提示，只负责状态复位。
  */
 import { showDialog, showToast } from 'vant'
 import {
   DEFAULT_FAIL_MSG,
   FAIL_DEDUPE_WINDOW,
-  MAX_MSG_LENGTH,
   NOTIFY_ENABLED,
   SILENT_LIST
 } from '@/constants/request'
@@ -19,13 +19,6 @@ const lastShownAt = new Map()
 function normalize(text) {
   if (text === null || text === undefined) return ''
   return String(text).replace(/\s+/g, ' ').trim()
-}
-
-/** 按字符（码点）截断，超长追加省略号 */
-function truncate(text, max) {
-  const chars = Array.from(text)
-  if (chars.length <= max) return text
-  return chars.slice(0, max).join('') + '…'
 }
 
 /**
@@ -54,7 +47,7 @@ export function notifyError(message, options = {}) {
   const { key, dedupeWindow = FAIL_DEDUPE_WINDOW, title = '提示', fallback = DEFAULT_FAIL_MSG } =
     options
 
-  const text = truncate(normalize(message) || fallback, MAX_MSG_LENGTH)
+  const text = normalize(message) || fallback
 
   if (key) {
     const now = Date.now()
@@ -77,7 +70,7 @@ export function notifyError(message, options = {}) {
  */
 export function notifyToast(message) {
   if (!NOTIFY_ENABLED) return
-  const text = truncate(normalize(message), MAX_MSG_LENGTH)
+  const text = normalize(message)
   if (!text) return
   showToast(text)
 }

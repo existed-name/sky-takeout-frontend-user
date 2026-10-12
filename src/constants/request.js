@@ -12,9 +12,6 @@ export const REQUEST_TIMEOUT = 10000
 /** 全局失败提示总开关（排查问题时置为 false 可静音全部提示） */
 export const NOTIFY_ENABLED = true
 
-/** 提示文案最大长度（超过则截断并追加省略号） */
-export const MAX_MSG_LENGTH = 40
-
 /** 业务失败兜底文案 */
 export const DEFAULT_FAIL_MSG = '请求失败，请稍后重试'
 
@@ -32,14 +29,13 @@ export const LOGIN_EXPIRED_DEDUPE_WINDOW = 3000
 
 /**
  * 静默清单：这些端点失败时不弹全局提示（由页面自行渲染空态/占位）。
+ * 与小程序端的 FAIL_TOAST_SILENT_REQUESTS 逐字一致，只有以下两条。
  * 必须精确匹配「METHOD + 空格 + 绝对路径」——例如 /user/shopping-carts 同时有
  * GET / POST / DELETE 三个方法，只有 GET 静默。
  */
 export const SILENT_LIST = [
   'GET /user/shopping-carts',
-  'GET /user/shop/status',
-  // 无默认地址时返回 code:0 +「您还没有设置默认地址~」，属正常空态，暂定静默（待确认）
-  'GET /user/address-books/default'
+  'GET /user/shop/status'
 ]
 
 /**

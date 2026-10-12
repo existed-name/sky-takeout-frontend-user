@@ -14,6 +14,7 @@
   - 管理端前端：`sky-takeout-frontend`
   - 本仓库（用户端前端）：`sky-takeout-frontend-user`
 - 目的：让「后端 + 管理端前端 + Web 用户端」能一起部署，供同学体验完整业务流程。
+- **Web 版比小程序端多一层「手机屏容器」装饰**：路由页面被放进一块固定逻辑宽（375px）的居中「手机」里，桌面窗口显示为深色桌布，窄屏 / 矮窗自动退化为整屏。小程序端没有这个角色（它始终全屏）。结构与红线见 §5.1。
 
 ---
 
@@ -115,6 +116,27 @@
 - **避免循环依赖**：`utils/request.js` 需要跳登录页，但直接 import router 会形成循环（router → views → api → request）。因此 `request.js` 只 import `utils/auth-bridge.js`，真正的跳转由 `main.js` 注册。页面跳转一律走 `router` / `<RouterLink>`，不要用 `location.href`。
 - **不做乐观更新**：购物车的真相源是后端，所有加减都是「发请求 → 重新 `GET /user/shopping-carts` 回灌」，store 只是缓存。不做重复请求取消，防重复点击由页面按钮的 in-flight 禁用承担。
 
+### 5.1 手机屏容器与视觉红线（改样式 / 加动效前必读）
+
+- **结构**：`src/components/AppShell.vue` 是唯一壳层，DOM 为 `.app-stage > .app-phone > (.app-phone__scroll + #app-overlay-layer)`：
+  - `.app-phone__scroll` 是页面滚动容器（页面内所有 `100%` 高度都相对它解析）；
+  - `#app-overlay-layer` 是所有弹层的挂载点。
+  `App.vue` 只做 `<AppShell><RouterView /></AppShell>`；容器样式统一放在 `src/styles/index.css`。
+
+- **⚠⚠ 头号红线（以后的人极易无意破坏，务必牢记）**：`.app-phone` 上有一条 `transform: translateZ(0)`，它让容器的 padding box 成为**所有 `position: fixed` 后代的包含块** —— 弹层、吸底条、遮罩因此天然与手机等宽、贴手机底、不会跑到桌布上、不被内层滚动带走。因此：
+  - **不得删除** `.app-phone` 的 `transform`；
+  - **任何祖先元素都不得再出现 `transform` / `filter` / `will-change: transform` / `opacity < 1`** —— 一旦出现，它就会成为「更近的包含块」，把弹层和吸底条从手机框里拽出来（定位跑偏 / 被裁）。给容器或页面加动效、加「性能优化」属性时最容易踩到；动手前先问一句：它是不是某个 `position: fixed` 元素的祖先？是则绝不可加。
+  - 需要视觉反馈优先用颜色 / `background` / `box-shadow`，或交给弹层自身（Vant 的进出场动效）实现。
+
+- **弹层挂载**：所有弹层必须挂进 `#app-overlay-layer`：
+  - 组件式弹层（`PopupSheet`）显式传 `:teleport="OVERLAY_TARGET"`（常量在 `src/constants/layout.js`，是全仓唯一真源）；
+  - 函数式弹窗（Vant `showDialog` / `showConfirmDialog` / `showToast`）在 `main.js` **顶层**用 `setDialogDefaultOptions` / `setToastDefaultOptions` 统一设置挂载点，**不要**到各调用点逐个改；这两个调用必须在 `app.mount()` 之前。
+  - ⚠ 挂载点随 `AppShell` 常驻挂载，**不得做成按需渲染（`v-if`）**：目标不存在时 Vue 只会打印一条 `Invalid Teleport target` 警告，弹层**完全不显示**，是极难排查的一类故障。
+
+- **视觉取值唯一来源**：颜色 / 圆角 / 间距 / 字号 / 阴影 / 动效时长一律从 `src/styles/variables.css` 取变量，视图与组件里**不得写颜色等字面量**（组件的 prop 默认值同样不得写死颜色，应留空、由 CSS 回退到变量）。Vant 组件通过 `variables.css` 里的 `--van-*` 桥接层吃同一份色板。详细规格见 §8。
+
+- **页面高度**：页面根一律 `min-height: 100%`（相对 `.app-phone__scroll`），**禁止 `100vh`**（容器不是视口，`100vh` 会比手机高一截、多出可滚空白）；弹层最大高用百分比而非 `vh`。
+
 ---
 
 ## 6. 刻意偏离微信小程序的地方（都是有意为之，不要「修回去」）
@@ -127,7 +149,9 @@
 | 打烊遮罩 | 透明层吃掉点击 + 底部半透明条 | 改为**可见的半透明遮罩 + 居中卡片**（透明层在浏览器里是可用性陷阱：点了没反应且无解释） |
 | 结算页拨号 | 占位值 `114` | 用门店电话常量 `SHOP_PHONE`（`400-618-4000`） |
 | 401 后跳转 | `reLaunch` 回首页 | **跳登录页**（并把当前路径塞进 `redirect`，登录后回跳） |
-| 无默认地址 | 弹提示 | `GET /user/address-books/default` 加入静默清单，由结算页自行渲染「请选择收货地址」空态 |
+| 无默认地址 | 弹提示 | 与其它失败一致：由请求层弹后端原话（该端点**不在**静默清单里）；结算页同时渲染「请选择收货地址」空态 |
+| 手机屏容器 | 无（始终全屏） | 桌面端多一层 375 逻辑宽的居中「手机」+ 深色桌布，弹层 / 吸底条按容器定位；窄屏 / 矮窗退化为整屏（见 §5.1） |
+| 已登录访问 `/login` | —— | 直接放行、不强制跳走（避免重定向打转） |
 | 成功页跳首页 | 带遗留参数 `?status=不验证` | **不复刻**该无后端语义的参数 |
 
 ---
@@ -148,10 +172,37 @@
 - **地址 `sex` 只接受字符串 `"1"/"2"`**，发 `"0"` 会被拒。
 - **订单状态 3 是「待派送」、7 是「已退款」**（不要说成「已接单」「退款」）。
 - **再来一单后端只做「校验 + 插入」**：不清空原购物车、失败不回滚。因此前端必须走 `src/api/reorder.js` 的编排函数（快照 → 清空 → 复制 → 失败按快照尽力恢复），**页面不得直接调用 order 模块里的 `reorderOrder`**。
+- **价格色是 `--color-price`（`#E94E3C`），不是主色黄**：金额数字与数量角标一律用它，**不要**用 `--color-primary`。
+- **`GET /user/address-books/default` 不在静默清单里**：失败会由请求层弹后端原话（如「您还没有设置默认地址~」），结算页不要自己再弹一次。
+- **静默清单只含 `GET /user/shopping-carts` 与 `GET /user/shop/status`**，其余端点失败一律弹提示。
 
 ---
 
-## 8. 部署与开源注意
+## 8. 视觉规格速查（改样式前必读）
+
+> 全部取自 `src/styles/variables.css`；**不要**在别处重写这些值。设计基准逻辑宽 375px，`1rpx = 0.5px`。
+
+**配色铁律**：
+
+- 主色是**金黄** `--color-primary`，用于主按钮底 / 选中态 / 下划线；**黄底上必须配深色文字** `--color-primary-text`，**禁止白字**（对比度会崩）。白底上的文字 / 描边用琥珀橙 `--color-accent` 而非纯黄。
+- **价格色独立**：所有金额数字与数量角标用 `--color-price`（`#E94E3C`），**不是**主色黄。
+- 页面底 `--color-bg`、卡片 `--color-bg-card`。
+- ⚠ 早期曾把主色误记为橙红系（那是小程序导航栏的兜底色，业务页 `navigationStyle: "custom"` 从不显示它）——**属误读，已废弃**。颜色一律走变量，视图里不写字面量（见 §5.1）。
+- Vant 组件通过 `variables.css` 的 `--van-*` 桥接层吃同一份色板；**能用 `--van-*` 表达的绝不写选择器补丁**。
+
+**字号**：正文 `--font-base`、按钮 `--font-lg`、小标题 `--font-title`、区块标题 / 价格 `--font-heading`、弹层标题 `--font-sheet`、弹层价格 `--font-price-xl`、说明 `--font-md` / `--font-sm` / `--font-xs`。
+
+**圆角**：标签 `--radius-xs`、通用卡片 / 主按钮 / 底部弹层顶角 `--radius-sm`、地址卡 / 规格项 `--radius-md`、结算页信息卡 `--radius-lg`、居中弹层 `--radius-sheet`、胶囊 `--radius-pill`。
+
+**间距**：页面左右留白 `--gap-page`、区块垂直间距 `--gap-block`、卡片内边距 `--gap-card`、列表项 `--gap-item`。
+
+**阴影**：只允许 `--shadow-card`（悬浮卡）与 `--shadow-bar`（底部条），不要新增其它阴影。
+
+**动效**：时长只有 `--duration-fast`(0.2s) 与 `--duration-base`(0.3s)，不得出现字面量秒数；明确**不做**骨架屏、加购飞入、路由切换过渡、列表逐条入场动画（小程序端也没有这些）。
+
+---
+
+## 9. 部署与开源注意
 
 - **环境变量**（全部 `VITE_` 前缀，三个都有代码内默认值，不写任何 `.env` 文件也能 `dev` / `build`）：
 
@@ -161,7 +212,7 @@
   | `VITE_APP_BASE` | `/` | 同时驱动 Vite 的 `base` 与 vue-router 的 base；部署到子路径时改为该子路径。**不要设成 `/user/`** —— 会与接口前缀 `/user/**` 抢占同一段路径，代理无法区分 |
   | `VITE_DEV_PROXY_TARGET` | `http://localhost:8080` | 仅 dev / preview 的 `/user` 代理目标 |
 
-- **dev / preview 只代理 `/user` 前缀**到后端，且**不做路径重写**；生产由反向代理把 `/user/` 转发到后端（同样不需 `pathRewrite`），前端代码无需改动。
+- **dev / preview 只代理 `/user` 前缀**到后端，且**不做路径重写**；生产由反向代理把 `/user/` 转发到后端（同样不需 `pathRewrite`），前端代码无需改动。前端是**纯静态文件 + hash 路由**，服务端**不需要任何** try_files / history-fallback 之类的路由改写。
 - **`.env*` 不进版本库**（`.gitignore` 已忽略），**只提交 `.env.example`**（`.gitignore` 放行 `*.example`）。**仓库内不得出现任何密钥**（三个变量都是地址类，无敏感值）。
 - **`dist/` 不进库**（`.gitignore` 已忽略）。
 - 若前端为 HTTPS 而后端为 HTTP，浏览器会拦截混合内容，必须走同源反向代理或给后端上证书。

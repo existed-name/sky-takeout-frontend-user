@@ -283,7 +283,7 @@ onBeforeUnmount(() => {
               :status="order.status"
               :remain-ms="remainMs"
               size="18px"
-              :color="isUnpaid ? 'var(--color-primary)' : 'var(--color-text)'"
+              :color="isUnpaid ? 'var(--color-accent)' : 'var(--color-text)'"
             />
             <span v-if="isUnpaid" class="status-card__countdown">
               <van-icon name="clock-o" />
@@ -373,7 +373,7 @@ onBeforeUnmount(() => {
             </div>
             <div class="fee__row fee__row--total">
               <span class="fee__label">合计</span>
-              <MoneyText :value="order.amount" size="16px" bold color="var(--color-primary)" />
+              <MoneyText :value="order.amount" size="16px" bold color="var(--color-price)" />
             </div>
           </div>
         </section>
@@ -434,26 +434,26 @@ onBeforeUnmount(() => {
 <style scoped>
 .order-detail {
   position: relative;
-  min-height: 100vh;
+  min-height: 100%;
   background-color: var(--color-bg);
 }
 
 .order-detail__body {
   position: relative;
-  padding: 12px 12px calc(24px + env(safe-area-inset-bottom, 0px));
+  padding: var(--gap-page) var(--gap-page) calc(24px + env(safe-area-inset-bottom, 0px));
 }
 
 .card {
-  margin-bottom: 12px;
+  margin-bottom: var(--gap-block);
   padding: 14px 16px;
   background-color: var(--color-bg-card);
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
 }
 
 .card__title {
   margin-bottom: 12px;
   color: var(--color-text);
-  font-size: 15px;
+  font-size: var(--font-title);
   font-weight: 600;
 }
 
@@ -469,14 +469,14 @@ onBeforeUnmount(() => {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  color: var(--color-primary);
-  font-size: 13px;
+  color: var(--color-accent);
+  font-size: var(--font-md);
 }
 
 .status-card__hint {
   margin-top: 8px;
   color: var(--color-text-secondary);
-  font-size: 12px;
+  font-size: var(--font-sm);
   line-height: 1.5;
 }
 
@@ -508,7 +508,7 @@ onBeforeUnmount(() => {
   flex: none;
   width: 52px;
   height: 52px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   object-fit: cover;
   background-color: var(--color-bg);
 }
@@ -521,7 +521,7 @@ onBeforeUnmount(() => {
 .dish__name {
   overflow: hidden;
   color: var(--color-text);
-  font-size: 14px;
+  font-size: var(--font-base);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -529,19 +529,19 @@ onBeforeUnmount(() => {
 .dish__flavor {
   margin-top: 2px;
   color: var(--color-text-placeholder);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 
 .dish__number {
   margin-top: 2px;
   color: var(--color-text-secondary);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 
 .dish__price {
   flex: none;
-  color: var(--color-text);
-  font-size: 14px;
+  color: var(--color-price);
+  font-size: var(--font-base);
 }
 
 /* 费用 */
@@ -557,12 +557,12 @@ onBeforeUnmount(() => {
   justify-content: space-between;
   padding: 4px 0;
   color: var(--color-text-secondary);
-  font-size: 13px;
+  font-size: var(--font-md);
 }
 
 .fee__row--total {
   color: var(--color-text);
-  font-size: 14px;
+  font-size: var(--font-base);
 }
 
 /* 联系商家 */
@@ -574,19 +574,19 @@ onBeforeUnmount(() => {
 }
 
 .contact__icon {
-  color: var(--color-primary);
+  color: var(--color-primary-border);
   font-size: 18px;
 }
 
 .contact__text {
   flex: 1 1 auto;
   color: var(--color-text);
-  font-size: 14px;
+  font-size: var(--font-base);
 }
 
 .contact__phone {
   color: var(--color-text-secondary);
-  font-size: 13px;
+  font-size: var(--font-md);
 }
 
 .contact__arrow {
@@ -599,7 +599,7 @@ onBeforeUnmount(() => {
   display: flex;
   gap: 12px;
   padding: 6px 0;
-  font-size: 13px;
+  font-size: var(--font-md);
 }
 
 .info__label {

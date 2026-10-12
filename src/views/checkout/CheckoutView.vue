@@ -136,7 +136,7 @@ const slotOptions = computed(() =>
 /**
  * 进入本页：按需重拉购物车与默认地址（对小程序的有意偏离）。
  * 购物车为空 → 重拉；仍为空 → 提示并跳回首页。
- * 草稿无地址 → 回退到默认地址接口（无默认地址是正常业务失败，静默端点，保持空态）。
+ * 草稿无地址 → 回退到默认地址接口（无默认地址属正常业务失败，失败提示由请求层统一弹出）。
  */
 onMounted(async () => {
   initializing.value = true
@@ -163,7 +163,8 @@ async function ensureAddress() {
     const def = await getDefaultAddress()
     if (def) draft.setAddress(def)
   } catch (e) {
-    // 无默认地址（code:0，静默端点）：保持空态，交由用户点地址块去选择
+    // 失败（含「您还没有设置默认地址~」）已由请求层统一弹出后端原话；
+    // 这里不重复弹窗，只保持空态，等用户点地址块去选择。
   } finally {
     addressLoading.value = false
   }
@@ -594,21 +595,21 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .checkout {
-  min-height: 100vh;
+  min-height: 100%;
   padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
   box-sizing: border-box;
   background-color: var(--color-bg);
 }
 
 .checkout__body {
-  padding: 12px;
+  padding: var(--gap-page);
 }
 
 .card {
-  margin-bottom: 12px;
+  margin-bottom: var(--gap-block);
   padding: 14px;
   background-color: var(--color-bg-card);
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
 }
 
 .card--rows {
@@ -618,7 +619,7 @@ onBeforeUnmount(() => {
 .card__title {
   margin-bottom: 10px;
   color: var(--color-text);
-  font-size: 15px;
+  font-size: var(--font-title);
   font-weight: 600;
 }
 
@@ -632,7 +633,7 @@ onBeforeUnmount(() => {
 
 .checkout__address-icon {
   flex: none;
-  color: var(--color-primary);
+  color: var(--color-accent);
   font-size: 22px;
 }
 
@@ -649,25 +650,25 @@ onBeforeUnmount(() => {
 
 .checkout__address-name {
   color: var(--color-text);
-  font-size: 16px;
+  font-size: var(--font-title);
   font-weight: 600;
 }
 
 .checkout__address-phone {
   color: var(--color-text-secondary);
-  font-size: 14px;
+  font-size: var(--font-base);
 }
 
 .checkout__address-detail {
   margin-top: 4px;
   color: var(--color-text-secondary);
-  font-size: 13px;
+  font-size: var(--font-md);
   line-height: 1.5;
 }
 
 .checkout__address-empty {
   color: var(--color-text-placeholder);
-  font-size: 15px;
+  font-size: var(--font-lg);
 }
 
 .checkout__address-loading {
@@ -675,7 +676,7 @@ onBeforeUnmount(() => {
   align-items: center;
   gap: 10px;
   color: var(--color-text-placeholder);
-  font-size: 15px;
+  font-size: var(--font-lg);
 }
 
 .checkout__arrow {
@@ -700,7 +701,7 @@ onBeforeUnmount(() => {
   flex: none;
   width: 48px;
   height: 48px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   object-fit: cover;
   background-color: var(--color-bg);
 }
@@ -712,14 +713,14 @@ onBeforeUnmount(() => {
 
 .goods__name {
   color: var(--color-text);
-  font-size: 15px;
+  font-size: var(--font-lg);
   line-height: 1.4;
 }
 
 .goods__flavor {
   margin-top: 2px;
   color: var(--color-text-placeholder);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 
 .goods__right {
@@ -729,14 +730,14 @@ onBeforeUnmount(() => {
 
 .goods__count {
   color: var(--color-text-secondary);
-  font-size: 13px;
+  font-size: var(--font-md);
 }
 
 .goods__amount {
   display: block;
   margin-top: 2px;
   color: var(--color-text);
-  font-size: 15px;
+  font-size: var(--font-lg);
 }
 
 /* 费用明细 */
@@ -745,7 +746,7 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: space-between;
   padding: 6px 0;
-  font-size: 14px;
+  font-size: var(--font-base);
 }
 
 .fee__label {
@@ -753,7 +754,7 @@ onBeforeUnmount(() => {
 }
 
 .fee__value {
-  color: var(--color-text);
+  color: var(--color-price);
 }
 
 .fee--total {
@@ -763,13 +764,13 @@ onBeforeUnmount(() => {
 }
 
 .fee--total .fee__label {
-  color: var(--color-text);
+  color: var(--color-text-secondary);
   font-weight: 600;
 }
 
 .fee__value--total {
-  color: var(--color-primary);
-  font-size: 17px;
+  color: var(--color-price);
+  font-size: var(--font-heading);
 }
 
 /* 信息行 */
@@ -788,14 +789,14 @@ onBeforeUnmount(() => {
 .row__label {
   flex: none;
   color: var(--color-text);
-  font-size: 15px;
+  font-size: var(--font-lg);
 }
 
 .row__value {
   flex: 1 1 auto;
   min-width: 0;
   color: var(--color-text-secondary);
-  font-size: 14px;
+  font-size: var(--font-base);
   text-align: right;
 }
 
@@ -814,18 +815,16 @@ onBeforeUnmount(() => {
 .checkout__bar {
   position: fixed;
   bottom: 0;
-  left: 50%;
+  left: 0;
   z-index: 90;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   width: 100%;
-  max-width: var(--app-max-width);
   padding: 10px 16px;
   padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
   box-sizing: border-box;
-  transform: translateX(-50%);
   background-color: var(--color-bg-card);
   border-top: 1px solid var(--color-border);
 }
@@ -838,12 +837,12 @@ onBeforeUnmount(() => {
 
 .checkout__bar-label {
   color: var(--color-text-secondary);
-  font-size: 13px;
+  font-size: var(--font-md);
 }
 
 .checkout__bar-amount {
-  color: var(--color-primary);
-  font-size: 20px;
+  color: var(--color-price);
+  font-size: var(--font-heading);
 }
 
 .checkout__bar-btn {
@@ -861,15 +860,15 @@ onBeforeUnmount(() => {
   flex: 1;
   padding: 8px 0;
   color: var(--color-text-secondary);
-  font-size: 15px;
+  font-size: var(--font-lg);
   background-color: var(--color-bg);
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
 }
 
 .arrival__day--active {
-  color: var(--color-primary);
-  border-color: var(--color-primary);
+  color: var(--color-accent);
+  border-color: var(--color-primary-border);
   background-color: var(--color-primary-light);
 }
 
@@ -883,15 +882,15 @@ onBeforeUnmount(() => {
 .arrival__slot {
   padding: 10px 0;
   color: var(--color-text);
-  font-size: 14px;
+  font-size: var(--font-base);
   background-color: var(--color-bg);
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
 }
 
 .arrival__slot--active {
-  color: var(--color-primary);
-  border-color: var(--color-primary);
+  color: var(--color-accent);
+  border-color: var(--color-primary-border);
   background-color: var(--color-primary-light);
 }
 
@@ -906,15 +905,15 @@ onBeforeUnmount(() => {
   flex: 1;
   padding: 10px 0;
   color: var(--color-text-secondary);
-  font-size: 14px;
+  font-size: var(--font-base);
   background-color: var(--color-bg);
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
 }
 
 .tableware__option--active {
-  color: var(--color-primary);
-  border-color: var(--color-primary);
+  color: var(--color-accent);
+  border-color: var(--color-primary-border);
   background-color: var(--color-primary-light);
 }
 
@@ -928,14 +927,14 @@ onBeforeUnmount(() => {
 .tableware__stepper-label {
   flex: 1 1 auto;
   color: var(--color-text);
-  font-size: 15px;
+  font-size: var(--font-lg);
 }
 
 .tableware__stepper-btn {
   width: 32px;
   height: 32px;
   color: var(--color-text);
-  font-size: 18px;
+  font-size: var(--font-heading);
   line-height: 1;
   background-color: var(--color-bg);
   border: 1px solid var(--color-border);
@@ -949,7 +948,7 @@ onBeforeUnmount(() => {
 .tableware__stepper-value {
   min-width: 24px;
   color: var(--color-text);
-  font-size: 16px;
+  font-size: var(--font-title);
   text-align: center;
 }
 
@@ -958,11 +957,11 @@ onBeforeUnmount(() => {
   width: 100%;
   padding: 10px;
   color: var(--color-text);
-  font-size: 14px;
+  font-size: var(--font-base);
   line-height: 1.6;
   background-color: var(--color-bg);
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   box-sizing: border-box;
   resize: none;
 }
@@ -970,7 +969,7 @@ onBeforeUnmount(() => {
 .remark__count {
   margin-top: 6px;
   color: var(--color-text-placeholder);
-  font-size: 12px;
+  font-size: var(--font-sm);
   text-align: right;
 }
 
@@ -1004,7 +1003,7 @@ onBeforeUnmount(() => {
 .contact__hint {
   margin-top: 8px;
   color: var(--color-text-placeholder);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 
 .contact__call {

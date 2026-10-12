@@ -133,7 +133,7 @@ async function onSubmit() {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
+  min-height: 100%;
   padding: 24px 20px;
   box-sizing: border-box;
 }
@@ -143,12 +143,13 @@ async function onSubmit() {
   max-width: 400px;
   padding: 32px 24px;
   background-color: var(--color-bg-card);
-  border-radius: 16px;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
 }
 
+/* 品牌标题：黄字在白底不可读，统一用辅助橙 */
 .login__title {
-  color: var(--color-primary);
+  color: var(--color-accent);
   font-size: 26px;
   font-weight: 700;
   text-align: center;
@@ -157,19 +158,19 @@ async function onSubmit() {
 .login__subtitle {
   margin-top: 6px;
   color: var(--color-text-secondary);
-  font-size: 14px;
+  font-size: var(--font-base);
   text-align: center;
 }
 
 .login__desc {
   margin-top: 20px;
   color: var(--color-text-secondary);
-  font-size: 13px;
+  font-size: var(--font-md);
   line-height: 1.6;
 }
 
 .login__desc strong {
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 .login__form {
@@ -183,7 +184,7 @@ async function onSubmit() {
 .login__error {
   margin-top: 8px;
   color: var(--color-danger);
-  font-size: 13px;
+  font-size: var(--font-md);
 }
 
 .login__submit {
@@ -193,7 +194,7 @@ async function onSubmit() {
 .login__hint {
   margin-top: 16px;
   color: var(--color-text-placeholder);
-  font-size: 12px;
+  font-size: var(--font-sm);
   text-align: center;
 }
 </style>

@@ -1,21 +1,160 @@
-/* 全局主题变量：主色沿用小程序（#E95F3C），页面背景 #F8F8F8 */
+/* 全局主题变量。
+   色板以「微信小程序用户端」的真实规格为准（主色金黄 #FFC200、页面底 #EFEFF4）；
+   早期使用的 #E95F3C 是小程序 app.json 的导航栏兜底色（所有业务页都是
+   navigationStyle:"custom"，它实际从不显示），属于误读，已废弃。
+   两条铁律：
+     1) 黄底（--color-primary）上必须配深色文字（--color-primary-text），禁止白字；
+     2) 除本文件与 styles/index.css 外，任何地方不得再写颜色字面量。
+   尺寸换算基准：逻辑宽 375px 下 1rpx = 0.5px。 */
 :root {
-  --color-primary: #e95f3c;
-  --color-primary-light: #fdeee9;
-  --color-primary-dark: #cf4a29;
-
-  --color-text: #333333;
-  --color-text-secondary: #666666;
-  --color-text-placeholder: #999999;
-  --color-text-inverse: #ffffff;
-
-  --color-bg: #f8f8f8;
-  --color-bg-card: #ffffff;
-  --color-border: #eeeeee;
-  --color-danger: #ee0a24;
-
-  /* 移动端优先：桌面端居中窄栏，最大宽度约 480px */
-  --app-max-width: 480px;
+  /* ================= 布局：手机屏容器 ================= */
+  --phone-width: 375px;
+  --phone-height: 812px;
+  --phone-radius: 18px;
+  --desk-bg: #20232a;              /* 桌布（手机之外的背景）——本方案自定，非小程序规格 */
+  --desk-glow: radial-gradient(120% 80% at 50% 0%, #2c313d 0%, #20232a 62%, #191c22 100%);
+  --app-max-width: var(--phone-width);   /* 兼容别名：老代码里的 --app-max-width 一律等于手机宽 */
   --navbar-height: 44px;
   --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+
+  /* ================= 品牌主色（黄） ================= */
+  --color-primary: #ffc200;        /* 主按钮底 / 选中态 / 下划线 */
+  --color-primary-text: #333333;   /* 黄底上的文字（必须深色） */
+  --color-primary-light: #fef8e7;  /* 选中浅底 / 弹层标题底 */
+  --color-primary-border: #ffb302; /* 未选描边 / 琥珀 */
+  --color-primary-deep: #473d26;   /* 结算页深棕（可选） */
+
+  /* ================= 价格（独立于主色） ================= */
+  --color-price: #e94e3c;          /* 所有金额数字 / 数量角标底 */
+
+  /* ================= 辅助橙（状态与提示文字） ================= */
+  --color-accent: #f58c21;
+
+  /* ================= 背景 ================= */
+  --color-bg: #efeff4;
+  --color-bg-card: #ffffff;
+  --color-bg-side: #f3f4f7;
+  --color-bg-muted: #f6f6f6;
+
+  /* ================= 线 ================= */
+  --color-border: #efefef;
+  --color-border-dashed: #ebebeb;
+  --color-border-soft: #ebeef5;
+
+  /* ================= 文字 ================= */
+  --color-text: #333333;
+  --color-text-strong: #20232a;
+  --color-text-secondary: #666666;
+  --color-text-muted: #818693;
+  --color-text-placeholder: #999999;
+  --color-text-input-placeholder: #bdbdbd;
+  --color-text-inverse: #ffffff;
+
+  /* ================= 状态 ================= */
+  --color-success: #1dc779;
+  --color-warning: #e6a23c;
+  --color-danger: #e94e3c;
+  --color-disabled: #d8d8d8;
+
+  /* ================= 特殊 ================= */
+  --color-bar-dark: rgba(0, 0, 0, 0.9);
+  --color-bar-text: #ffffff;
+  --color-mask: rgba(0, 0, 0, 0.4);
+
+  /* ================= 圆角（1rpx = 0.5px） ================= */
+  --radius-xs: 2px;      /* 4rpx   标签 */
+  --radius-sm: 4px;      /* 8rpx   通用卡片 / 主按钮 / 底部弹层顶角 */
+  --radius-md: 6px;      /* 12rpx  地址卡 / 规格选项 */
+  --radius-lg: 8px;      /* 16rpx  结算页店铺信息卡 */
+  --radius-sheet: 10px;  /* 20rpx  居中弹层 */
+  --radius-pill: 36px;   /* 72rpx  胶囊按钮 */
+
+  /* ================= 间距 ================= */
+  --gap-page: 15px;   /* 30rpx  页面左右留白 */
+  --gap-block: 10px;  /* 20rpx  区块垂直间距 */
+  --gap-card: 20px;   /* 40rpx  卡片内边距 */
+  --gap-item: 20px;   /* 40rpx  列表项间距 */
+
+  /* ================= 字号（小程序 rpx → px） ================= */
+  --font-xs: 10px;        /* 20rpx   极小说明 */
+  --font-sm: 12px;        /* 24rpx   弱化正文 / 角标 */
+  --font-md: 13px;        /* 26rpx   次要正文 */
+  --font-base: 14px;      /* 28rpx   正文基准 */
+  --font-lg: 15px;        /* 30rpx   按钮文字 */
+  --font-title: 16px;     /* 32rpx   小标题 / 弹层正文 */
+  --font-heading: 18px;   /* 36rpx   区块标题 / 价格 */
+  --font-sheet: 20px;     /* 40rpx   弹层大标题 */
+  --font-price-xl: 24px;  /* 48rpx   弹层价格 */
+
+  /* ================= 阴影（全站只允许两档） ================= */
+  --shadow-card: 0 2px 5px 0 rgba(69, 69, 69, 0.1);   /* 0 4rpx 10rpx */
+  --shadow-bar: 0 3px 5px 0 rgba(0, 0, 0, 0.25);      /* 0 6rpx 10rpx */
+
+  /* ================= 动效（只有两档） ================= */
+  --duration-fast: 0.2s;
+  --duration-base: 0.3s;
+  --ease-out: cubic-bezier(0.25, 0.8, 0.25, 1);
+
+  /* ================= Vant 4 主题桥接 ================= */
+  /* 基础色 */
+  --van-primary-color: var(--color-primary);
+  --van-danger-color: var(--color-danger);
+  --van-success-color: var(--color-success);
+  --van-warning-color: var(--color-warning);
+  --van-text-color: var(--color-text);
+  --van-text-color-2: var(--color-text-secondary);
+  --van-text-color-3: var(--color-text-placeholder);
+  --van-background: var(--color-bg);
+  --van-background-2: var(--color-bg-card);
+  --van-border-color: var(--color-border);
+
+  /* 按钮：黄底必须深字 */
+  --van-button-primary-background: var(--color-primary);
+  --van-button-primary-border-color: var(--color-primary);
+  --van-button-primary-color: var(--color-primary-text);
+  --van-button-danger-color: var(--color-text-inverse);   /* 危险色保持白字 */
+  --van-button-radius: var(--radius-sm);
+  --van-button-round-radius: var(--radius-pill);
+  --van-button-normal-font-size: var(--font-lg);
+
+  /* 表单 / 单元格 */
+  --van-field-label-color: var(--color-text);
+  --van-field-input-text-color: var(--color-text);
+  --van-field-placeholder-text-color: var(--color-text-input-placeholder);
+  --van-cell-background: var(--color-bg-card);
+  --van-cell-text-color: var(--color-text);
+  --van-cell-value-color: var(--color-text-secondary);
+  --van-cell-border-color: var(--color-border);
+  --van-cell-font-size: var(--font-base);
+  --van-radio-checked-icon-color: var(--color-primary);
+
+  /* 级联选择（地址省市区） */
+  --van-cascader-title-font-size: var(--font-title);
+  --van-tabs-bottom-bar-color: var(--color-primary);
+  --van-cascader-tab-color: var(--color-accent);
+  --van-cascader-unselected-tab-color: var(--color-text-secondary);
+
+  /* 弹层 / 弹窗 / 轻提示 */
+  --van-popup-round-radius: var(--radius-sm);   /* 底部弹层顶角：小程序 8rpx 8rpx 0 0 */
+  --van-popup-background: var(--color-bg-card);
+  --van-dialog-radius: var(--radius-sheet);     /* 居中弹窗：小程序 20rpx */
+  --van-dialog-confirm-button-text-color: var(--color-accent);
+  --van-dialog-message-font-size: var(--font-base);
+  /* 消息最大高：不能用 vh（桌面窗口可能远高于「手机」），用 min() 双保险 */
+  --van-dialog-message-max-height: min(55dvh, 480px);
+  --van-toast-radius: var(--radius-md);
+  --van-toast-background: rgba(0, 0, 0, 0.78);
+  --van-toast-text-color: var(--color-text-inverse);
+  --van-loading-spinner-color: var(--color-primary);
+  --van-list-text-color: var(--color-text-placeholder);
+  --van-pull-refresh-head-text-color: var(--color-text-placeholder);
+  --van-badge-background: var(--color-price);
 }
+
+/* 说明（避免后人不必要的覆盖）：
+   - --van-radius-md/lg（4px/8px）与本方案 --radius-sm/lg 数值一致，无需覆盖；
+   - --van-dialog-width: 320px < 手机宽 375px，居中弹窗不会被裁；
+   - --van-toast-max-width: 70% 是相对包含块（= 手机）的百分比，自动正确；
+   - --van-duration-base/fast（0.3s/0.2s）与小程序节奏一致，不要改小。
+   以上 Vant 桥接必须由 styles/index.css 在 vant/lib/index.css 之后加载才能生效
+   （main.js 里的 import 顺序已保证，勿调换）。 */

@@ -1,6 +1,9 @@
 <script setup>
 /**
- * 首页底部结算条（合计 + 件数 + 去结算 + 费用说明行）。
+ * 首页底部结算条（深色悬浮胶囊条：合计 + 件数 + 去结算 + 费用说明行）。
+ *
+ * 定位：position: fixed，参照系是「手机屏容器」（.app-phone 的 transform 使其成为包含块），
+ * 所以只需 left/right 内缩 12px，不需要相对视口居中的 max-width + translateX(-50%)。
  *
  * 红线：配送费 / 打包费属业务常量，组件不得自行读取 src/constants/business.js，
  * 一律由父组件通过 props（deliveryFee / packingFeePerItem）传入；
@@ -66,7 +69,7 @@ const feeLine = computed(() => {
           :content="count > 0 ? count : ''"
           :max="99"
           :show-zero="false"
-          offset="[-2, 4]"
+          :offset="[-2, 4]"
         >
           <van-icon
             name="shopping-cart-o"
@@ -77,7 +80,7 @@ const feeLine = computed(() => {
       </div>
 
       <div class="cart-bar__total">
-        <MoneyText :value="amount" size="18px" color="var(--color-primary, #e95f3c)" bold />
+        <MoneyText :value="amount" size="18px" color="var(--color-price)" bold />
         <span class="cart-bar__count" v-if="count > 0">共 {{ count }} 件</span>
       </div>
 
@@ -97,31 +100,35 @@ const feeLine = computed(() => {
 </template>
 
 <style scoped>
+/* 固定定位的参照系是「手机屏容器」而非浏览器视口：
+   .app-phone 的 transform 已使其成为包含块，因此只需相对手机左右内缩 12px。 */
 .cart-bar {
   position: fixed;
-  bottom: 0;
-  left: 50%;
+  left: 12px;
+  right: 12px;
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
   z-index: 90;
-  width: 100%;
-  max-width: var(--app-max-width, 480px);
-  transform: translateX(-50%);
-  background-color: var(--color-bg-card, #ffffff);
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.06);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+  display: flex;
+  flex-direction: column;
 }
 
+/* 费用说明行：悬浮于胶囊条上方 */
 .cart-bar__fee {
-  padding: 6px 12px;
-  background-color: var(--color-primary-light, #fdeee9);
-  color: var(--color-primary-dark, #cf4a29);
-  font-size: 12px;
+  padding: 0 10px 6px;
+  color: var(--color-accent);
+  font-size: var(--font-sm);
+  text-align: right;
 }
 
+/* 深色悬浮胶囊条：高 52px；36px 圆角会被 CSS 夹成 26px，即小程序 50rpx 的胶囊观感 */
 .cart-bar__main {
   display: flex;
   align-items: center;
   height: 52px;
   padding: 0 12px;
+  background-color: var(--color-bar-dark);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-bar);
 }
 
 .cart-bar__left {
@@ -134,13 +141,13 @@ const feeLine = computed(() => {
 }
 
 .cart-bar__cart {
-  color: var(--color-text-placeholder, #999999);
+  color: var(--color-bar-text);
   font-size: 28px;
-  transition: color 0.2s ease;
+  transition: color var(--duration-fast) var(--ease-out);
 }
 
 .cart-bar__cart--active {
-  color: var(--color-primary, #e95f3c);
+  color: var(--color-primary);
 }
 
 .cart-bar__total {
@@ -149,17 +156,18 @@ const feeLine = computed(() => {
   align-items: baseline;
   gap: 8px;
   padding-left: 8px;
+  font-variant-numeric: tabular-nums;
 }
 
 .cart-bar__count {
-  color: var(--color-text-secondary, #666666);
-  font-size: 12px;
+  color: var(--color-bar-text);
+  font-size: var(--font-sm);
+  opacity: 0.75;
 }
 
+/* 去结算胶囊：黄底深字由 Vant 主题桥接（--van-button-primary-*）自动提供，不再写死颜色 */
 .cart-bar__checkout {
   flex: none;
   min-width: 96px;
-  background-color: var(--color-primary, #e95f3c);
-  border-color: var(--color-primary, #e95f3c);
 }
 </style>

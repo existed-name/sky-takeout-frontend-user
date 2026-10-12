@@ -1,13 +1,22 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import Vant from 'vant'
+import Vant, { setDialogDefaultOptions, setToastDefaultOptions } from 'vant'
+// 顺序要紧：vant 的样式先加载，本项目主题变量后加载，后者赢（同级 :root 选择器）。
 import 'vant/lib/index.css'
 
 import App from './App.vue'
 import router from '@/router'
 import { useAuthStore } from '@/stores/auth'
 import { registerAuthHandler } from '@/utils/auth-bridge'
+import { OVERLAY_TARGET } from '@/constants/layout'
 import '@/styles/index.css'
+
+// Vant 的函数式弹窗（Dialog / Toast）默认 teleport 到 document.body，会铺满整个浏览器窗口。
+// 这里把它们的默认挂载点统一指向「手机屏容器」内的覆盖层，弹层便自动与手机等宽、贴手机底。
+// ⚠ 必须在顶层、app.mount() 之前调用；且挂载点（AppShell 内的 #app-overlay-layer）必须常驻，
+//    做成按需渲染（v-if）会导致目标不存在时弹层完全不显示（Vue 仅 warn）。
+setDialogDefaultOptions({ teleport: OVERLAY_TARGET })
+setToastDefaultOptions({ teleport: OVERLAY_TARGET })
 
 // 应用装配：pinia → router → Vant → 全局样式。
 const app = createApp(App)

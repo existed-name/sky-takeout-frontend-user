@@ -34,24 +34,24 @@ defineProps({
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 60px 16px;
+  padding: 48px 16px;
   text-align: center;
 }
 
 .empty-state__icon {
   margin-bottom: 12px;
-  color: var(--color-text-placeholder, #999999);
+  color: var(--color-text-placeholder);
   font-size: 48px;
 }
 
 .empty-state__text {
-  color: var(--color-text-secondary, #666666);
-  font-size: 14px;
+  color: var(--color-text-secondary);
+  font-size: var(--font-base);
 }
 
 .empty-state__desc {
   margin-top: 6px;
-  color: var(--color-text-placeholder, #999999);
-  font-size: 12px;
+  color: var(--color-text-placeholder);
+  font-size: var(--font-sm);
 }
 </style>

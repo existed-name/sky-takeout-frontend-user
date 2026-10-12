@@ -300,7 +300,7 @@ onMounted(() => {
           v-model="regionCode"
           :options="areaOptions"
           title="选择所在地区"
-          active-color="#e95f3c"
+          active-color="var(--color-accent)"
           @change="onRegionChange"
           @finish="onRegionFinish"
           @close="regionVisible = false"
@@ -340,30 +340,30 @@ onMounted(() => {
 <style scoped>
 .addr-form {
   position: relative;
-  min-height: 100vh;
+  min-height: 100%;
   box-sizing: border-box;
 }
 
 .addr-form__body {
   position: relative;
-  padding: 12px 0 24px;
+  padding: var(--gap-block) 0 24px;
 }
 
 .addr-form__group {
-  margin-bottom: 20px;
+  margin-bottom: var(--gap-card);
 }
 
 .addr-form__row {
   display: flex;
   align-items: center;
   padding: 10px 16px;
-  font-size: 14px;
+  font-size: var(--font-base);
 }
 
 .addr-form__row-label {
   flex: none;
   width: 92px;
-  color: var(--color-text, #333333);
+  color: var(--color-text);
 }
 
 .addr-form__radios {
@@ -377,23 +377,24 @@ onMounted(() => {
 
 .addr-form__tag {
   padding: 3px 14px;
-  color: var(--color-text-secondary, #666666);
-  font-size: 13px;
-  background-color: var(--color-bg, #f8f8f8);
-  border: 1px solid var(--color-border, #eeeeee);
-  border-radius: 14px;
+  color: var(--color-text-secondary);
+  font-size: var(--font-md);
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
 }
 
+/* 选中标签：浅黄底 + 琥珀描边 + 橙字（黄底/黄字在白底不可读，故用辅助橙） */
 .addr-form__tag.is-on {
-  color: var(--color-primary, #e95f3c);
-  background-color: var(--color-primary-light, #fdeee9);
-  border-color: var(--color-primary, #e95f3c);
+  color: var(--color-accent);
+  background-color: var(--color-primary-light);
+  border-color: var(--color-primary-border);
 }
 
 .addr-form__error {
   margin: 0 16px 8px;
-  color: var(--color-danger, #ee0a24);
-  font-size: 13px;
+  color: var(--color-danger);
+  font-size: var(--font-md);
 }
 
 .addr-form__actions {

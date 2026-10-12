@@ -58,20 +58,32 @@ export const useCartStore = defineStore('cart', () => {
 
   /**
    * 加菜 / 加套餐（每调用一次 +1 份），成功后回灌。
+   * 回灌（GET，静默端点）失败时抛出的错误带 stage:'refresh' 标记，交由调用方补一次轻提示。
    * @param {{dishId?:number, setmealId?:number, dishFlavor?:string|null}} payload
    */
   async function add(payload) {
     await addToCart(payload)
-    await refresh()
+    try {
+      await refresh()
+    } catch (e) {
+      // 回灌失败：GET 在静默清单内，不会自动弹；打标记交给调用方补一次轻提示
+      throw { ...e, stage: 'refresh' }
+    }
   }
 
   /**
    * 某行数量减一（PUT，无 body），成功后回灌。
+   * 回灌失败时同样带 stage:'refresh' 标记。
    * @param {number} id 购物车行 id
    */
   async function decrement(id) {
     await decrementCartItem(id)
-    await refresh()
+    try {
+      await refresh()
+    } catch (e) {
+      // 回灌失败：GET 在静默清单内，不会自动弹；打标记交给调用方补一次轻提示
+      throw { ...e, stage: 'refresh' }
+    }
   }
 
   /**
