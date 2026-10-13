@@ -9,7 +9,7 @@
 # 因此同一个镜像可以指向不同的后端 / 不同的挂载路径，改配置只需重启容器。
 #
 # 可用的运行期环境变量（默认值由 Dockerfile 的 ENV 提供，可在 docker run 时用 -e 覆盖）：
-#   BACKEND_HOST  后端服务主机名，默认 sky-backend（容器间用 compose 服务名互访）
+#   BACKEND_HOST  后端服务主机名，默认 sky-takeout-backend（容器间用 compose 服务名互访）
 #   BACKEND_PORT  后端服务端口，  默认 8080
 #   APP_BASE      前端挂载路径，  默认 /（随构建期 VITE_APP_BASE 走）
 #

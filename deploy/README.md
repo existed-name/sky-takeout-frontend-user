@@ -5,8 +5,9 @@
 便于与后端 / 管理端一起编排部署。
 
 > 本目录**只负责本仓库的镜像与配置**。整套服务（后端 + 管理端 + 本用户端 + MySQL + Redis）的
-> 编排（`docker-compose.yml`、对外端口、镜像命名、后端服务名）由**全局编排方**另行提供 ——
-> 所以本文档对宿主机端口一律**只给示例**，不写死任何具体部署值。
+> 编排（`docker-compose.yml` 等）由**全局编排方**统一维护；与本用户端相关的接入值已经定下：
+> 对外宿主机端口 **8082**、镜像 **`sky-takeout-frontend-user:1.0.0`**、后端主机名
+> **`sky-takeout-backend`**（可直接采用的服务块见第八节）。
 
 ## 一、本目录里有什么
 
@@ -20,7 +21,7 @@
 | 文件 | 作用 |
 | --- | --- |
 | `Dockerfile` | 前端镜像：容器内用 `node:20-alpine` 构建，再用 `nginx:1.27-alpine` 托管 `dist/`。构建上下文是**仓库根目录**。 |
-| `.dockerignore` | 挡掉 `node_modules`、`dist`、`.git`、`.env*`（放行 `.env.example`）、`.idea`、`draft` 等，避免它们进入构建上下文。 |
+| `.dockerignore` | 挡掉 `node_modules`、`dist`、`.git`、`.env*`（放行 `.env.example`）、`.idea`、本机草稿类目录等，避免它们进入构建上下文。 |
 | `.env.example` | 开发期（dev / preview）的环境变量模板，**不参与镜像构建**，仅供本地参考。 |
 
 ---
@@ -38,7 +39,7 @@
 └───────────────────────────────────────────────────┘
 ```
 
-- 镜像内部 nginx **固定监听 80**；映射到宿主机的哪个端口由编排决定。
+- 镜像内部 nginx **固定监听 80**；对外映射到宿主机 **8082**（由编排的 `ports:` 落地）。
 - 前端是**纯静态文件 + hash 路由**，因此**不需要**后端同源之外的额外处理；本模板仍带了
   `try_files` 回退，更稳妥（见第三节说明）。
 
@@ -75,7 +76,7 @@ docker build --build-arg VITE_APP_BASE=/web/ -t sky-takeout-frontend-user:1.0.0 
 
 | 环境变量 | 默认值 | 作用 |
 | --- | --- | --- |
-| `BACKEND_HOST` | `sky-backend` | `/user/**` 反向代理的后端**主机名**。同 compose 编排时填后端服务名；跨主机时填主机名 / IP。 |
+| `BACKEND_HOST` | `sky-takeout-backend` | `/user/**` 反向代理的后端**主机名**。同 compose 编排时填后端服务名；跨主机时填主机名 / IP。 |
 | `BACKEND_PORT` | `8080` | 后端端口。 |
 | `APP_BASE` | `/`（随构建期 `VITE_APP_BASE` 自动取值） | 前端**挂载路径**，必须与构建期 `VITE_APP_BASE` 一致。Dockerfile 已把构建期的值默认落到这里，正常构建无需手动设。取值 `/` 或 `/web/`（须以 `/` 开头且结尾）。 |
 
@@ -89,8 +90,8 @@ docker build --build-arg VITE_APP_BASE=/web/ -t sky-takeout-frontend-user:1.0.0 
 
 ## 五、容器内监听端口
 
-- 容器内固定 **80**（`EXPOSE 80`）。宿主机端口由编排（compose 的 `ports:` 或 `docker run -p`）决定，
-  本文档**不写死**任何宿主机端口。
+- 容器内固定 **80**（`EXPOSE 80`）。对外映射到宿主机的 **8082**（即 `8082:80`），由编排的
+  compose `ports:` 或 `docker run -p` 落地。
 
 ---
 
@@ -106,41 +107,80 @@ docker build --build-arg VITE_APP_BASE=/web/ -t sky-takeout-frontend-user:1.0.0 
 
 ---
 
-## 七、最小示例（**只读**，宿主机端口 8081 只是示例）
+## 七、最小示例（**只读**）
 
-> ⚠ 下面命令**仅作说明**，不要照抄到生产；宿主机端口请以**全局编排**为准。
-> 这里用 **8081** 只是因为它在编写本文档的本机是**空闲**端口（本机已占用：
-> 3306 / 3307 / 33060 / 6379 / 8080 / 8090 等）。示例会**真的启动容器并占用 8081**，
+> ⚠ 下面命令用于**本机单跑验证**，正式部署请以第八节的服务块为准。**8082** 是本用户端
+> 约定的**对外宿主机端口**（它在编写本文档的本机是空闲端口，本机已占用：
+> 3306 / 3307 / 33060 / 6379 / 8080 / 8090 等）。本示例会**真的启动容器并占用 8082**，
 > 不需要时请自行 `docker stop` / `docker rm`。
 
 ```bash
 # 1) 构建镜像（在【本仓库根目录】执行；构建上下文是仓库根）
 docker build -t sky-takeout-frontend-user:1.0.0 .
 
-# 2) 运行（宿主机 8081 -> 容器 80；后端指向宿主机上的 8080）
+# 2) 运行（宿主机 8082 -> 容器 80；后端指向宿主机上的 8080）
 #    跨容器编排时，用后端服务名替换 host.docker.internal、并把容器接入同一个网络。
 docker run --rm -d \
   --name sky-user-web \
-  -p 8081:80 \
+  -p 8082:80 \
   -e BACKEND_HOST=host.docker.internal \
   -e BACKEND_PORT=8080 \
   sky-takeout-frontend-user:1.0.0
 
-# 3) 验证：浏览器打开 http://localhost:8081/ 应看到用户端首页
+# 3) 验证：浏览器打开 http://localhost:8082/ 应看到用户端首页
 #    （后端在宿主机 8080 时，接口请求经容器内 nginx 转发到 host.docker.internal:8080）
 ```
 
 > Linux 上 `host.docker.internal` 默认不可用，需加 `--add-host=host.docker.internal:host-gateway`，
 > 或直接改用后端所在主机名 / IP。跨容器编排请优先把它们放进同一 Docker 网络、用服务名互访。
 
+> **排查提示（如何验证渲染结果）**：要确认站点配置真的生效，**必须让容器命令以 `nginx` 开头**
+> —— 例如 `docker run --rm sky-takeout-frontend-user:1.0.0 nginx -T`，它会打印**渲染后**的完整生效配置。
+> nginx 官方 entrypoint 只在第一个参数是 `nginx` / `nginx-debug` 时才执行 `/docker-entrypoint.d/`
+> 下的脚本；**若把容器命令覆盖成 `sh`**（如 `docker run ... sh -c "…"`），**模板不会被渲染**，
+> 看到的会是镜像自带的默认配置 —— 这一点容易被误判成「配置没生效」。
+
 ---
 
-## 八、待全局编排补充的契约
+## 八、接入全局编排
 
-以下项**刻意留空、可配置**，等待全局编排方（负责整套 compose 的会话）提供：
+本容器可直接并入整套服务的 `docker-compose.yml`。把下面这段服务块加进对方编排的
+`services:` 下即可（缩进与编排里其它服务对齐）：
 
-1. **宿主机端口**：本容器对外发布到哪个端口（本文档示例用 8081）。
-2. **`BACKEND_HOST` / `BACKEND_PORT`**：后端在编排网络里的服务名与端口（默认 `sky-backend:8080`）。
-3. **镜像命名与版本**：镜像名 / tag（本文档示例用 `sky-takeout-frontend-user:1.0.0`）。
-4. **是否挂在子路径**：若整套服务要把用户端放在 `/web/` 之类子路径下，则需
+```yaml
+  frontend-user:
+    image: sky-takeout-frontend-user:1.0.0
+    container_name: sky-takeout-frontend-user
+    restart: unless-stopped
+    environment:
+      BACKEND_HOST: sky-takeout-backend
+      BACKEND_PORT: "8080"
+    ports:
+      - "8082:80"
+    networks:
+      - sky-takeout-net
+```
+
+要点：
+
+- **网络**：`sky-takeout-net` 是对方已用 `name:` 固定的**外部网络**，本服务的
+  `networks` 必须与对方 compose 里的取值完全一致，容器才能用服务名解析到后端。
+- **`BACKEND_HOST` 要指向后端服务名**：本镜像的默认值已经是 `sky-takeout-backend`，
+  与对方后端服务名一致时无需再设；若对方后端服务名不同，务必在 `environment` 里覆盖
+  成实际服务名，否则 nginx 解析不到上游。`BACKEND_PORT` 默认 `8080`（后端容器内端口）。
+- ⚠ **`proxy_pass` 里的主机名是 nginx 启动时解析的**：若后端容器比本容器晚就绪，
+  本容器会因解析不到上游而启动失败。建议在编排里对本服务加 `depends_on`，指向后端服务。
+- 本前端**不使用 WebSocket**，只需要普通 HTTP 请求与静态资源：对方验收项里若有
+  WebSocket 通路，与本容器无关。
+
+---
+
+## 九、已确定的接入契约
+
+以下接入值已经定下，编排方可直接采用；各项仍保持可配置，需要时可在编排里覆盖：
+
+1. **宿主机端口**：对外发布 **8082**（`8082:80`）。
+2. **`BACKEND_HOST` / `BACKEND_PORT`**：**`sky-takeout-backend:8080`**（本镜像默认值即此）。
+3. **镜像命名与版本**：**`sky-takeout-frontend-user:1.0.0`**。
+4. **是否挂在子路径**：默认挂根路径（`APP_BASE=/`）。若整套服务要把用户端放在 `/web/` 之类子路径下，则需
    `--build-arg VITE_APP_BASE=/web/` 构建，并让 `APP_BASE` 同步为 `/web/`。

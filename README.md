@@ -93,14 +93,14 @@ src/
   - `VITE_APP_BASE`：前端挂载路径，默认 `/`；挂子路径时用 `--build-arg VITE_APP_BASE=/web/` 构建。
   - `VITE_API_BASE_URL`：默认**留空 = 同源**（请求打到 `/user/...`，由容器内 nginx 反代到后端），通常不用改。
 - **运行期环境变量**（容器启动时由 nginx 的 envsubst 注入，改后端地址只需重启容器）：
-  - `BACKEND_HOST`（默认 `sky-backend`）、`BACKEND_PORT`（默认 `8080`）、`APP_BASE`（默认随构建期的 `VITE_APP_BASE`）。
+  - `BACKEND_HOST`（默认 `sky-takeout-backend`）、`BACKEND_PORT`（默认 `8080`）、`APP_BASE`（默认随构建期的 `VITE_APP_BASE`）。
 - 容器内 **固定监听 80**；映射到宿主机的端口由全局编排决定。
 - 容器内 nginx 把 `/user/` **原样反向代理**到后端（不做路径重写，与开发期 dev 代理语义一致），静态资源带合理缓存头，并带 SPA 回退。
 
 ```bash
 # 在仓库根目录构建（宿主机端口仅为示例，实际由编排决定）
 docker build -t sky-takeout-frontend-user:1.0.0 .
-docker run --rm -d --name sky-user-web -p 8081:80 \
+docker run --rm -d --name sky-user-web -p 8082:80 \
   -e BACKEND_HOST=host.docker.internal -e BACKEND_PORT=8080 \
   sky-takeout-frontend-user:1.0.0
 ```

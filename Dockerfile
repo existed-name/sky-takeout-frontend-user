@@ -90,7 +90,7 @@ COPY deploy/nginx/default.conf.template /etc/nginx/templates/default.conf.templa
 # 从而让「构建时挂在哪」与「nginx 从哪提供」自动保持一致，避免两边写岔。
 ARG VITE_APP_BASE=/
 ENV APP_BASE=${VITE_APP_BASE} \
-    BACKEND_HOST=sky-backend \
+    BACKEND_HOST=sky-takeout-backend \
     BACKEND_PORT=8080
 
 # 容器内固定监听 80；映射到宿主机的哪个端口由编排（compose / docker run -p）决定。
