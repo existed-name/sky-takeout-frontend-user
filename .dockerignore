@@ -1,0 +1,29 @@
+# 前端镜像的构建上下文是【本仓库根目录】，本文件用于挡掉不需要传给 Docker 守护进程的文件。
+# 说明与部署流程见 deploy/README.md。
+
+# 依赖与产物（体积大；产物应由容器内重新构建，避免把旧产物误打进镜像）
+node_modules
+dist
+
+# 版本库元数据与忽略清单
+.git
+.gitignore
+
+# 本机草稿类文件
+draft
+
+# 编辑器 / IDE 目录
+.idea
+.vscode
+
+# 环境变量文件：让构建的配置来源只有 Dockerfile 里显式提供的 ARG，消除环境差异。
+# 放行示例文件 .env.example（不含真实值）。
+.env
+.env.*
+!.env.example
+
+# 日志
+*.log
+
+# 注意：deploy/ 必须保留在构建上下文里（运行阶段要拷 deploy/nginx/default.conf.template），
+#       因此这里【不排除】deploy/。
