@@ -1,12 +1,41 @@
 # 苍穹外卖 · Web 用户端（前端）
 
-## 项目简介
+---
 
-本仓库是教学项目「苍穹外卖」的 **Web 用户端前端**（手机点餐 H5）。它功能对齐同一项目的微信小程序用户端，**只少了「微信登录」** —— 登录改为「体验登录」（输入昵称即建号）。
+<details>
+<summary><h2>前言</h2></summary>
 
-在整个项目里，前端与后端分属独立仓库、独立构建、独立部署。本仓库只负责用户端的页面与交互，不含后端逻辑；后端是一个独立的 Spring Boot 服务（仓库 `sky-takeout-backend`），开发时通过代理把请求转发给它。这样，后端 + 用户端前端即可一起部署，供同学体验完整业务流程。
+### 简要说明
 
-## 技术栈
+1. 本仓库为黑马程序员苍穹外卖用户端 Web 前端仓库, 仅供学习参考
+2. 最开始想把微信小程序发布出来, 但是发现要设置各种东西、备案审核等等, 太麻烦; 而微信小程序的体验功能又需要添加成员、扫码体验、好像还有时间限制; 于是就让 AI 把小程序转成 Web 前端放到服务器上面, 方便直接体验
+3. 开发环境是 Node22, 但 20、24 应该都可以跑
+
+### 友情链接
+
+* [黑马哔站教程](https://www.bilibili.com/video/BV1TP411v7v6/?share_source=copy_web&vd_source=043cbf9fed7a1099cc00e49137e0ff99)
+* [黑马百度网盘资料](https://pan.baidu.com/s/1MNDzXyVlr3mtmLgBjcPJVw?pwd=6633)
+* [前辈的在线讲义网站](https://mouday.github.io/java-cqwm/)
+* [个人博客仓库](https://github.com/existed-name/Personal-Blogs)
+
+### 项目仓库总览
+
+* [后端](https://github.com/existed-name/sky-takeout-backend), 已部署
+* [管理端 Web 前端](https://github.com/existed-name/sky-takeout-frontend-admin), 已部署, 可通过网址 http://39.105.17.19:80 访问
+* [用户端小程序](https://github.com/existed-name/sky-takeout-miniprogram)
+* [用户端 Web 前端](https://github.com/existed-name/sky-takeout-frontend-user), 本仓库、已部署, 可通过网址 http://39.105.17.19:8082 访问
+* 备注：后端请求路径、请求参数是自己写的，跟教程给的前端接不上，所以这里专门给前端做了同步、再发出来
+
+### 其他说明
+
+* 除了这里的 `前言`, README 其他部分、[CLAUDE.md](/CLAUDE.md)都是 AI 写的, 可供二次开发参考
+
+</details>
+
+
+
+<details>
+<summary><h2>技术栈</h2></summary>
 
 - Vue 3（组合式 API + `<script setup>`）
 - Vite 5
@@ -16,13 +45,23 @@
 - Vant 4
 - 纯 JavaScript（不启用 TypeScript）
 
-## 环境要求
+</details>
+
+
+
+<details>
+<summary><h2>环境要求</h2></summary>
 
 - **Node.js >= 18**
 - 包管理器：**npm**（仓库内附 `package-lock.json`）
 - 需要同时把后端服务起好（见下文「与后端的关系」）
 
-## 快速开始
+</details>
+
+
+
+<details>
+<summary><h2>快速开始</h2></summary>
 
 ```bash
 # 1. 安装依赖
@@ -40,7 +79,12 @@ npm run preview
 
 开发服务端口为 **8090**。以上命令与 `package.json` 的 scripts 一致。
 
-## 配置说明
+</details>
+
+
+
+<details>
+<summary><h2>配置说明</h2></summary>
 
 所有环境变量都以 `VITE_` 前缀，且都有代码内默认值 —— **不写任何 `.env` 文件也能 `dev` / `build`**。需要自定义时，把 `.env.example` 复制为 `.env.development` / `.env.production` 再改。
 
@@ -52,9 +96,14 @@ npm run preview
 
 `.env` 文件已被 `.gitignore` 忽略，仓库只提交 `.env.example`。
 
-## 目录结构
+</details>
 
-```
+
+
+<details>
+<summary><h2>目录结构</h2></summary>
+
+```text
 src/
 ├── api/          # 接口层：按后端模块拆分的请求函数（登录 / 分类 / 菜品 / 套餐 / 购物车 / 地址 / 订单等）
 ├── components/   # 公共组件：手机屏外壳、导航栏、弹层、金额与订单状态展示等
@@ -70,14 +119,24 @@ src/
 
 `@` 别名指向 `src`（见 `vite.config.js`）。
 
-## 与后端的关系
+</details>
+
+
+
+<details>
+<summary><h2>与后端的关系</h2></summary>
 
 - 后端服务地址约定为 **`http://localhost:8080`**，**无 context-path**；用户端的所有端点都在 **`/user/**`** 下。
 - 本仓库的 dev / preview 只把 **`/user` 前缀整体代理**到 `VITE_DEV_PROXY_TARGET`（默认 `http://localhost:8080`），且**不做路径重写** —— 因此后端端点路径必须与前端请求路径逐字一致（例如 `/user/shopping-carts` 原样发到后端）。生产环境由反向代理把 `/user/` 转发到后端，同样不需要重写。
 - 运行本项目前，**请先在 8080 端口把后端服务起好**，否则接口请求会失败。
 - 前端是纯静态文件 + hash 路由，静态托管不需要任何 try_files / history fallback 之类的路由改写。
 
-## 注意事项
+</details>
+
+
+
+<details>
+<summary><h2>注意事项</h2></summary>
 
 - **登录是「体验登录」，不是真实微信授权**：输入一个昵称即可创建 / 登录账号（后端按该昵称派生一个稳定身份），同一昵称始终映射到同一个用户，购物车 / 订单 / 地址按该身份隔离。这是为了让同学快速体验业务流程而做的简化。
 - **配送距离限制**是后端的配置项：收货地址离店铺太远，提交订单会被后端拒绝。若体验时地址大多离店较远，需要调整后端配置或店铺地址。
@@ -85,7 +144,12 @@ src/
 - 本项目为教学演示用途，不接入真实支付。
 - 构建产物输出到 `dist/`，该目录已被 `.gitignore` 忽略。
 
-## 容器化部署
+</details>
+
+
+
+<details>
+<summary><h2>容器化部署</h2></summary>
 
 本仓库自带了容器化物料：仓库根的 `Dockerfile`（多阶段：`node:20-alpine` 构建 → `nginx:1.27-alpine` 托管 `dist/`）与 `.dockerignore`，站点配置模板在 `deploy/nginx/default.conf.template`。**完整说明见 [`deploy/README.md`](deploy/README.md)**，这里只列要点：
 
@@ -105,6 +169,15 @@ docker run --rm -d --name sky-user-web -p 8082:80 \
   sky-takeout-frontend-user:1.0.0
 ```
 
-## 许可
+</details>
+
+
+
+<details>
+<summary><h2>开源许可证</h2></summary>
 
 本项目采用 [GNU General Public License v3.0](LICENSE)（GPL-3.0）许可。
+
+</details>
+
+
